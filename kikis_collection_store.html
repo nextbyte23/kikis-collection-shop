@@ -176,10 +176,11 @@
   .tab-panel.active{display:block}
 
   /* Categorías / tarjetas grandes */
-  .cats{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
-  .cat-card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px 14px;text-align:center;transition:transform .15s,border-color .2s}
-  .cat-card:hover{transform:translateY(-3px);border-color:var(--gold)}
-  .cat-card .ico{font-size:2.2rem;margin-bottom:8px}
+  .cats{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+  .cat-card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:0;overflow:hidden;text-align:center;transition:transform .15s,border-color .2s,box-shadow .2s;display:flex;flex-direction:column}
+  .cat-card:hover{transform:translateY(-3px);border-color:var(--gold);box-shadow:0 8px 20px rgba(0,0,0,.12)}
+  .cat-card .cat-img{width:100%;aspect-ratio:1/1;object-fit:cover;display:block;background:#f3efe6}
+  .cat-card .cat-body{padding:12px 14px 14px}
   .cat-card h4{color:var(--gold);font-size:0.95rem;margin-bottom:4px}
   .cat-card small{color:var(--text-dim);font-size:0.78rem}
 
@@ -1336,10 +1337,10 @@
     <h2>Categorías</h2>
   </div>
   <div class="cats">
-    <a class="cat-card" href="#catalogo" onclick="switchTab('cat-boxes')"><div class="ico">📦</div><h4>Boxes</h4><small>Elite Trainer Box, Build & Battle, Premium</small></a>
-    <a class="cat-card" href="#catalogo" onclick="switchTab('cat-sobres')"><div class="ico">🃏</div><h4>Sobres</h4><small>Sobres sueltos y blísters</small></a>
-    <a class="cat-card" href="#catalogo" onclick="switchTab('cat-booster-bundle')"><div class="ico">🗂️</div><h4>Booster Bundle</h4><small>Paquetes de 6 sobres</small></a>
-    <a class="cat-card" href="#catalogo" onclick="switchTab('cat-figuras')"><div class="ico">🐉</div><h4>Figuras</h4><small>Select, vinilo y metálicas</small></a>
+    <a class="cat-card" href="#catalogo" onclick="switchTab('cat-boxes')"><img class="cat-img" src="img/categorias/boxes.webp" alt="Boxes" loading="lazy"><div class="cat-body"><h4>Boxes</h4><small>Elite Trainer Box, Build & Battle, Premium</small></div></a>
+    <a class="cat-card" href="#catalogo" onclick="switchTab('cat-sobres')"><img class="cat-img" src="img/categorias/sobres.webp" alt="Sobres" loading="lazy"><div class="cat-body"><h4>Sobres</h4><small>Sobres sueltos y blísters</small></div></a>
+    <a class="cat-card" href="#catalogo" onclick="switchTab('cat-booster-bundle')"><img class="cat-img" src="img/categorias/booster.webp" alt="Booster Bundle" loading="lazy"><div class="cat-body"><h4>Booster Bundle</h4><small>Paquetes de 6 sobres</small></div></a>
+    <a class="cat-card" href="#catalogo" onclick="switchTab('cat-figuras')"><img class="cat-img" src="img/categorias/figuras.webp" alt="Figuras" loading="lazy"><div class="cat-body"><h4>Figuras</h4><small>Select, vinilo y metálicas</small></div></a>
   </div>
 </section>
 
