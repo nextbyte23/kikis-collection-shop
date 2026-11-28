@@ -72,8 +72,8 @@ module.exports = async (req, res) => {
       payment_method_types: ['card'],
       mode: 'payment',
       line_items: lineItems,
-      success_url: `${baseUrl}/pago-resultado.html?status=success&method=stripe&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${baseUrl}/pago-resultado.html?status=cancel&method=stripe`,
+      success_url: `${baseUrl}/pago-resultado.html?prov=stripe&status=success&order=${encodeURIComponent(order_id || '')}&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${baseUrl}/pago-resultado.html?prov=stripe&status=cancel&order=${encodeURIComponent(order_id || '')}`,
       locale: 'es',
       // Enviar currency en MXN (requiere cuenta Stripe México)
       submit_type: 'pay',

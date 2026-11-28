@@ -82,8 +82,13 @@
   .ord-items{font-size:.85rem;color:var(--text);line-height:1.6;margin-bottom:8px}
   .ord-foot{display:flex;justify-content:space-between;font-size:.85rem;border-top:1px dashed var(--border);padding-top:8px}
   .ord-foot .total{font-weight:700;color:var(--gold)}
-  .ord-foot .date{color:var(--text-dim)}
-  .empty{color:var(--text-dim);text-align:center;padding:24px;font-size:.9rem}
+.ord-foot .date{color:var(--text-dim)}
+.ord-track{margin-top:10px;padding:10px 12px;background:#eef6ff;border:1px solid #cfe3ff;border-radius:8px;font-size:.82rem}
+.ord-track .trk-title{font-weight:700;color:#1e40af}
+.ord-track .trk-carrier{color:#555;margin-top:2px}
+.ord-track .trk-link{display:inline-block;margin-top:6px;color:#1e40af;font-weight:700;text-decoration:underline}
+.ord-track .trk-link.dim{color:#999;font-weight:400;text-decoration:none}
+.empty{color:var(--text-dim);text-align:center;padding:24px;font-size:.9rem}
 
   /* Acciones de cuenta */
   .actions-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
@@ -622,12 +627,23 @@ async function loadMyOrders(){
       const date = new Date(o.created_at).toLocaleDateString('es-MX', {day:'2-digit', month:'short', year:'numeric'});
       const statusLabel = (o.status || 'pendiente').charAt(0).toUpperCase() + (o.status || 'pendiente').slice(1);
       const total = fmtMoney(o.total);
+      // Tracking del paquete (si el admin ya asignó guía)
+      const trackUrl = (window.buildTrackingUrl && o.tracking_number) ? window.buildTrackingUrl(o.carrier, o.tracking_number) : null;
+      const carrierName = (o.carrier && window.CARRIERS && window.CARRIERS[o.carrier]) ? window.CARRIERS[o.carrier].name : (o.carrier || '');
+      const trackHtml = o.tracking_number
+        ? '<div class="ord-track">' +
+            '<div class="trk-title">📦 En camino · Guía: ' + escapeHtml(o.tracking_number) + '</div>' +
+            (carrierName ? '<div class="trk-carrier">Transportista: ' + escapeHtml(carrierName) + '</div>' : '') +
+            (trackUrl ? '<a href="' + trackUrl + '" target="_blank" rel="noopener" class="trk-link">Rastrear paquete →</a>' : '<span class="trk-link dim">Rastreo no disponible para este transportista</span>') +
+          '</div>'
+        : '';
       return '<div class="order-card">' +
         '<div class="ord-head">' +
           '<span class="ord-num">Pedido #' + o.id + '</span>' +
           '<span class="ord-status ' + (o.status||'pendiente') + '">' + statusLabel + '</span>' +
         '</div>' +
         '<div class="ord-items">' + (items || '<i>Sin items</i>') + '</div>' +
+        trackHtml +
         '<div class="ord-foot">' +
           '<span class="total">' + total + '</span>' +
           '<span class="date">' + date + '</span>' +

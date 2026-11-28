@@ -59,6 +59,7 @@
     <div class="detail" id="resultDetail" style="display:none"></div>
 
     <div class="actions" id="actions" style="display:none">
+      <a href="account.html" id="myOrdersBtn" class="btn btn-primary" style="display:none">📦 Ver mi compra y rastreo</a>
       <a href="/" class="btn btn-primary">Volver a la tienda</a>
       <a href="#" id="whatsappBtn" class="btn btn-whatsapp" target="_blank" rel="noopener">💬 Contactar por WhatsApp</a>
       <a href="/" class="btn btn-ghost">Seguir comprando</a>
@@ -176,7 +177,7 @@
     h1.textContent = titleText[status] || 'Resultado del pago';
 
     const leadText = {
-      approved: 'Gracias por tu compra. Recibirás la confirmación y el seguimiento de tu pedido por correo o WhatsApp.',
+      approved: 'Gracias por tu compra. Te enviamos un correo con el resumen de tu pedido. Cuando enviemos tu paquete verás el número de guía y el rastreo en tu cuenta.',
       pending:  'Tu pago está siendo procesado por el proveedor. Te avisaremos en cuanto se confirme.',
       'in_process': 'Tu pago está siendo procesado por el proveedor. Te avisaremos en cuanto se confirme.',
       authorized: 'Tu pago fue autorizado y está en revisión. Te avisaremos en cuanto se confirme.',
@@ -209,6 +210,9 @@
 
     // Acciones
     actionsEl.style.display = 'flex';
+    // Si el pago fue aprobado, mostrar el botón para ver la compra y el rastreo.
+    const myOrdersBtn = document.getElementById('myOrdersBtn');
+    if(myOrdersBtn){ myOrdersBtn.style.display = (status === 'approved') ? 'block' : 'none'; }
 
     // Botón WhatsApp con mensaje pre-armado
     const waMsg = encodeURIComponent(

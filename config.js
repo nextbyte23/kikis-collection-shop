@@ -64,3 +64,42 @@ window.mercadoPagoEnabled = function() {
 window.stripeEnabled = function() {
   return !!window.STRIPE_PUBLIC_KEY;
 };
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Datos del REMITENTE para la guía de envío imprimible (guia-envio.html).
+// Es información pública de la tienda, segura en el navegador.
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+window.STORE_ADDRESS = {
+  name: "Kiki's Collection Shop",
+  contact: "Tapachula, Chiapas, México",
+  street: "Av. Central #123, Colonia Centro",   // ← Pon tu dirección real
+  city: "Tapachula",
+  state: "Chiapas",
+  zip: "30700",
+  phone: window.WHATSAPP_NUMBER || "529626141770"
+};
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Transportistas soportados para el rastreo del paquete.
+// El cliente ve el enlace "Rastrear paquete" armado con trackingUrl
+// (sustituye {TRACK} por el número de guía). Agrega/edita los que uses.
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+window.CARRIERS = {
+  estafeta:        { name: "Estafeta",          trackingUrl: "https://www.estafeta.com/Herramientas/Rastreo?idioma=es&tipoGuia=1&numGuia={TRACK}" },
+  dhl:             { name: "DHL",               trackingUrl: "https://www.dhl.com/mx-es/home/tracking.html?track&submit=1&tracking-id={TRACK}" },
+  fedex:           { name: "FedEx",             trackingUrl: "https://www.fedex.com/fedextrack/?trknbr={TRACK}" },
+  correos:         { name: "Correos de México", trackingUrl: "https://www.correosdemexico.gob.mx/Seguimiento/" },
+  paqueteexpress:  { name: "Paquete Express",   trackingUrl: "https://www.paqueteexpress.com/rastreo?guia={TRACK}" },
+  quetal:          { name: "Quetal",            trackingUrl: "https://www.quetal.com.mx/rastreo?guia={TRACK}" },
+  send:            { name: "Send",              trackingUrl: "https://app.send.com.mx/tracking?guia={TRACK}" },
+  redpack:         { name: "Redpack",           trackingUrl: "https://www.redpack.com.mx/rastreo?guia={TRACK}" },
+  otro:            { name: "Otro",              trackingUrl: "" }
+};
+
+// Helper: arma la URL de rastreo para un transportista + número de guía.
+window.buildTrackingUrl = function(carrier, trackingNumber) {
+  if (!carrier || !trackingNumber) return null;
+  const c = window.CARRIERS[carrier];
+  if (!c || !c.trackingUrl) return null;
+  return c.trackingUrl.replace('{TRACK}', encodeURIComponent(trackingNumber));
+};

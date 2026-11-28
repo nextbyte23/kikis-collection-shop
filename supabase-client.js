@@ -471,7 +471,7 @@
       const { data: { user } } = await sb.auth.getUser();
       if (!user) return [];
       const { data, error } = await sb.from('orders')
-        .select('id, status, total, payment_method, created_at, order_items(name, qty, line_total)')
+        .select('id, status, total, payment_method, carrier, tracking_number, paid_at, shipped_at, created_at, order_items(name, qty, line_total)')
         .eq('customer_id', user.id)
         .order('created_at', { ascending: false })
         .limit(50);
@@ -484,7 +484,7 @@
       const sb = getSupabase();
       if (!sb) return [];
       const { data, error } = await sb.from('orders')
-        .select('id, customer_name, customer_email, customer_phone, customer_address_city, total, status, payment_method, created_at')
+        .select('id, customer_name, customer_email, customer_phone, customer_address_street, customer_address_city, customer_address_state, customer_address_zip, total, subtotal, shipping, status, payment_method, carrier, tracking_number, paid_at, shipped_at, created_at')
         .order('created_at', { ascending: false })
         .limit(200);
       if (error) throw error;
@@ -508,6 +508,40 @@
       const { data, error } = await sb.from('orders')
         .update({ status }).eq('id', id).select().single();
       if (error) throw error;
+      return data;
+    },
+
+    // Asigna transportista + número de guía a un pedido y lo marca como 'enviado'
+    // (solo admin). Así el cliente ve el rastreo en su historial de compras.
+    async setTracking(id, carrier, trackingNumber) {
+      const sb = getSupabase();
+      if (!sb) throw new Error('Sin conexión');
+      const patch = {
+        carrier: carrier || null,
+        tracking_number: (trackingNumber || '').trim() || null,
+        shipped_at: new Date().toISOString()
+      };
+      // Si el pedido estaba pagado/confirmado, al asignar guía pasa a 'enviado'.
+      const { data: cur } = await sb.from('orders').select('status').eq('id', id).maybeSingle();
+      if (cur && ['pagado', 'confirmado', 'pendiente'].includes(cur.status)) {
+        patch.status = 'enviado';
+      }
+      const { data, error } = await sb.from('orders')
+        .update(patch).eq('id', id).select().single();
+      if (error) throw error;
+      return data;
+    },
+
+    // Reenvía el correo de resumen del pedido al cliente (llama al endpoint
+    // server-side /api/send-order-email). Solo admin.
+    async resendOrderEmail(id) {
+      const resp = await fetch('/api/send-order-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_id: id })
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) throw new Error(data.error || 'No se pudo enviar el correo');
       return data;
     },
 

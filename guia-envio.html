@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guía de envío · Kiki's Collection Shop</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23fff' stroke='%23000' stroke-width='4'/%3E%3Cpath d='M2 50a48 48 0 0 1 96 0' fill='%23dc2626'/%3E%3Crect x='2' y='46' width='96' height='8' fill='%23000'/%3E%3Ccircle cx='50' cy='50' r='14' fill='%23fff' stroke='%23000' stroke-width='4'/%3E%3C/svg%3E">
+<!-- JsBarcode para el código de barras del número de guía -->
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{--ink:#111;--line:#000;--muted:#666;--bg:#fff;--soft:#f5f5f5;--gold:#c9a227}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:#ececec;color:var(--ink);line-height:1.45;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .sheet{background:var(--bg);max-width:820px;margin:24px auto;padding:30px 34px;box-shadow:0 2px 14px rgba(0,0,0,.12)}
+
+  /* Encabezado */
+  .top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;border-bottom:3px solid var(--line);padding-bottom:14px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand .logo{width:42px;height:42px;border-radius:8px;background:var(--gold);color:#2a1500;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.1rem}
+  .brand .store{font-weight:800;font-size:1.15rem}
+  .brand .store small{display:block;font-weight:400;font-size:.72rem;color:var(--muted)}
+  .doc-title{text-align:right}
+  .doc-title h1{font-size:1.3rem;letter-spacing:.5px}
+  .doc-title .ord{font-size:1.8rem;font-weight:900;margin-top:2px}
+  .doc-title .meta{font-size:.78rem;color:var(--muted);margin-top:2px}
+
+  /* Código de barras */
+  .barcode-box{display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px solid var(--line);border-radius:8px;padding:12px 16px;margin:16px 0}
+  .barcode-box svg{max-width:100%;height:54px}
+  .barcode-box .guia{font-size:1.5rem;font-weight:900;letter-spacing:2px;margin-top:4px}
+  .barcode-box .carrier{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+
+  /* Remitente / Destinatario */
+  .addr-row{display:flex;gap:12px;margin:16px 0}
+  .addr{flex:1;border:1.5px solid var(--line);border-radius:8px;padding:12px 14px}
+  .addr h2{font-size:.72rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px;border-bottom:1px solid #ddd;padding-bottom:4px}
+  .addr .who{font-weight:800;font-size:1.05rem}
+  .addr .line{font-size:.9rem;margin-top:2px}
+  .addr.dest{background:#fafafa}
+  .addr.dest h2{color:var(--ink)}
+
+  /* Items */
+  table.items{width:100%;border-collapse:collapse;margin-top:8px;font-size:.88rem}
+  table.items th{background:#222;color:#fff;text-align:left;padding:8px 10px;font-size:.74rem;text-transform:uppercase;letter-spacing:.5px}
+  table.items td{padding:8px 10px;border-bottom:1px solid #e5e5e5}
+  table.items td.r{text-align:right}
+  table.items tr:last-child td{border-bottom:0}
+
+  /* Totales */
+  .totals{display:flex;justify-content:flex-end;margin-top:12px}
+  .totals .col{width:240px;font-size:.9rem}
+  .totals .row{display:flex;justify-content:space-between;padding:4px 0}
+  .totals .row.grand{border-top:2px solid var(--line);margin-top:6px;padding-top:8px;font-size:1.1rem;font-weight:900}
+
+  .notes{margin-top:14px;font-size:.82rem;color:var(--muted);border-top:1px dashed #ccc;padding-top:10px}
+
+  .foot{margin-top:18px;text-align:center;font-size:.78rem;color:var(--muted);border-top:2px solid var(--line);padding-top:10px}
+
+  /* Estado badge */
+  .badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;border:1px solid var(--line)}
+  .badge.enviado{background:#dbeafe;color:#1e40af;border-color:#1e40af}
+  .badge.pagado{background:#dcfce7;color:#166534;border-color:#166534}
+  .badge.entregado{background:#d1fae5;color:#065f46;border-color:#065f46}
+  .badge.pendiente{background:#fef3c7;color:#92400e;border-color:#92400e}
+  .badge.cancelado{background:#fee2e2;color:#991b1b;border-color:#991b1b}
+
+  /* Acciones (solo pantalla) */
+  .actions{display:flex;gap:10px;justify-content:center;margin:18px auto 0;max-width:820px}
+  .btn{background:var(--gold);color:#2a1500;border:0;padding:11px 22px;border-radius:8px;font-weight:700;cursor:pointer;font-size:.92rem;font-family:inherit;text-decoration:none}
+  .btn:hover{filter:brightness(1.05)}
+  .btn.ghost{background:#fff;color:#333;border:1px solid #ccc}
+
+  #gate{max-width:520px;margin:60px auto;background:#fff;padding:40px;border-radius:12px;text-align:center;box-shadow:0 2px 14px rgba(0,0,0,.1)}
+  #gate h2{margin-bottom:8px}
+  #gate p{color:var(--muted);margin-bottom:18px;font-size:.92rem}
+  #gate .spin{display:inline-block;width:30px;height:30px;border:3px solid #eee;border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  @media print{
+    body{background:#fff}
+    .sheet{box-shadow:none;margin:0;max-width:none;padding:18px 20px}
+    .actions,.no-print{display:none!important}
+    .addr.dest{background:#fafafa!important}
+    table.items th{background:#222!important;color:#fff!important}
+    @page{size:A4;margin:12mm}
+  }
+  @media(max-width:640px){
+    .top{flex-direction:column}
+    .addr-row{flex-direction:column}
+    .doc-title{text-align:left}
+  }
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <div class="spin"></div>
+  <h2>Cargando guía…</h2>
+  <p>Recuperando el pedido.</p>
+</div>
+
+<!-- La guía se inyecta aquí -->
+<div id="guide" style="display:none"></div>
+
+<div class="actions no-print" id="actions" style="display:none">
+  <button class="btn" onclick="window.print()">🖨 Imprimir / Guardar PDF</button>
+  <a class="btn ghost" href="admin.html">← Volver al admin</a>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="supabase-client.js"></script>
+<script>
+(function(){
+  const params = new URLSearchParams(window.location.search);
+  const orderId = params.get('order');
+  const gate = document.getElementById('gate');
+  const guideEl = document.getElementById('guide');
+  const actionsEl = document.getElementById('actions');
+
+  function fail(msg){
+    gate.innerHTML = '<h2>No se pudo cargar la guía</h2><p>' + msg + '</p><a class="btn ghost" href="admin.html" style="display:inline-block;margin-top:10px">← Volver al admin</a>';
+  }
+
+  if(!orderId){ fail('Falta el número de pedido en la URL (?order=ID).'); return; }
+
+  if(!window.KikiDB || !window.KikiDB.isOnline()){
+    fail('No hay conexión a Supabase. Revisa config.js.'); return;
+  }
+
+  (async function(){
+    // Asegurar sesión admin (getOrderDetail requiere RLS de admin)
+    const session = await window.KikiDB.getSession().catch(()=>null);
+    if(!session){
+      fail('Necesitas iniciar sesión como admin. <a href="admin.html" style="color:#c9a227;font-weight:700">Ir al admin</a>, entra y vuelve a abrir la guía.');
+      return;
+    }
+    let detail;
+    try {
+      detail = await window.KikiDB.getOrderDetail(orderId);
+    } catch(err){
+      const m = (err.message||'').toLowerCase();
+      if(m.includes('jwt') || m.includes('auth') || m.includes('0 rows') || m.includes('no rows')){
+        fail('No se encontró el pedido o no tienes permiso de admin. <a href="admin.html" style="color:#c9a227;font-weight:700">Inicia sesión en el admin</a> e intenta de nuevo.');
+      } else {
+        fail('Error al cargar el pedido: ' + (err.message||err));
+      }
+      return;
+    }
+
+    renderGuide(detail);
+  })();
+
+  function esc(s){ if(s==null) return ''; return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function money(n){ const num=Number(n)||0; return '$'+num.toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2})+' MXN'; }
+  function statusClass(s){ return ['pendiente','confirmado','pagado','enviado','entregado','cancelado'].includes(s)?s:'pendiente'; }
+  function statusLabel(s){ return (s||'pendiente').charAt(0).toUpperCase()+(s||'pendiente').slice(1); }
+
+  function renderGuide(o){
+    const store = window.STORE_ADDRESS || {name:"Kiki's Collection Shop", street:'', city:'', state:'', zip:'', phone:''};
+    const carriers = window.CARRIERS || {};
+    const carrierName = o.carrier && carriers[o.carrier] ? carriers[o.carrier].name : (o.carrier || '');
+    const items = (o.order_items||[]).map(it =>
+      '<tr><td>'+esc(it.name)+(it.qty>1?' ×'+it.qty:'')+'</td><td class="r">'+money(it.unit_price)+'</td><td class="r">'+it.qty+'</td><td class="r">'+money(it.line_total)+'</td></tr>'
+    ).join('');
+
+    const addrLines = [o.customer_address_street, o.customer_address_city, o.customer_address_state, ('CP '+o.customer_address_zip).replace('CP null','').trim()]
+      .filter(Boolean).join('<br>');
+
+    const date = new Date(o.created_at).toLocaleString('es-MX',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+
+    guideEl.innerHTML =
+      '<div class="sheet">' +
+        '<div class="top">' +
+          '<div class="brand">' +
+            '<div class="logo">🎴</div>' +
+            '<div class="store">'+esc(store.name)+'<small>'+esc(store.contact||'')+'</small></div>' +
+          '</div>' +
+          '<div class="doc-title">' +
+            '<h1>GUÍA DE ENVÍO</h1>' +
+            '<div class="ord">#'+esc(o.id)+'</div>' +
+            '<div class="meta">'+date+' · <span class="badge '+statusClass(o.status)+'">'+statusLabel(o.status)+'</span></div>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="barcode-box">' +
+          (o.tracking_number
+            ? '<svg id="barcode"></svg><div class="guia">'+esc(o.tracking_number)+'</div><div class="carrier">'+esc(carrierName||'Transportista')+'</div>'
+            : '<div style="font-size:1rem;font-weight:700;color:#92400e;padding:14px 0">⚠ Sin guía asignada</div><div class="carrier">Asigna una guía desde el admin para imprimir el código de barras</div>') +
+        '</div>' +
+
+        '<div class="addr-row">' +
+          '<div class="addr rem">' +
+            '<h2>Remitente</h2>' +
+            '<div class="who">'+esc(store.name)+'</div>' +
+            (store.street?'<div class="line">'+esc(store.street)+'</div>':'') +
+            '<div class="line">'+esc([store.city,store.state,store.zip].filter(Boolean).join(', '))+'</div>' +
+            (store.phone?'<div class="line">Tel: '+esc(store.phone)+'</div>':'') +
+          '</div>' +
+          '<div class="addr dest">' +
+            '<h2>Destinatario</h2>' +
+            '<div class="who">'+esc(o.customer_name||'Cliente')+'</div>' +
+            (o.customer_phone?'<div class="line">Tel: '+esc(o.customer_phone)+'</div>':'') +
+            (addrLines?'<div class="line">'+addrLines+'</div>':'<div class="line" style="color:#999">(sin dirección)</div>') +
+            (o.customer_email?'<div class="line">'+esc(o.customer_email)+'</div>':'') +
+          '</div>' +
+        '</div>' +
+
+        '<table class="items">' +
+          '<thead><tr><th>Artículo</th><th class="r">P. unit.</th><th class="r">Cant.</th><th class="r">Importe</th></tr></thead>' +
+          '<tbody>'+(items||'<tr><td colspan="4" style="color:#999">Sin items</td></tr>')+'</tbody>' +
+        '</table>' +
+
+        '<div class="totals"><div class="col">' +
+          '<div class="row"><span>Subtotal</span><span>'+money(o.subtotal)+'</span></div>' +
+          '<div class="row"><span>Envío</span><span>'+money(o.shipping)+'</span></div>' +
+          '<div class="row grand"><span>Total</span><span>'+money(o.total)+'</span></div>' +
+        '</div></div>' +
+
+        (o.payment_method?'<div class="notes"><b>Pago:</b> '+esc(o.payment_method)+(o.payment_ref?' · Ref: '+esc(o.payment_ref):'')+'</div>':'') +
+        (o.notes?'<div class="notes"><b>Notas:</b> '+esc(o.notes)+'</div>':'') +
+
+        '<div class="foot">Recorte o doble esta guía y péguela en el paquete · '+esc(store.name)+' · '+esc(store.phone||'')+'</div>' +
+      '</div>';
+
+    gate.style.display = 'none';
+    guideEl.style.display = '';
+    actionsEl.style.display = 'flex';
+
+    // Renderizar el código de barras del número de guía
+    if(o.tracking_number && window.JsBarcode){
+      try {
+        window.JsBarcode('#barcode', String(o.tracking_number), {
+          format: 'CODE128', width: 2.2, height: 50, displayValue: false, margin: 0
+        });
+      } catch(e){ console.warn('JsBarcode falló:', e); }
+    }
+  }
+})();
+</script>
+</body>
+</html>

@@ -46,10 +46,11 @@ module.exports = async (req, res) => {
 
     // URL base para redirección post-pago (la tienda)
     const baseUrl = process.env.URL_BASE || 'https://www.kikicollectionshop.com';
+    const ordParam = encodeURIComponent(order_id || '');
     const backUrls = {
-      success: `${baseUrl}/pago-resultado.html?status=success&method=mercadopago`,
-      pending: `${baseUrl}/pago-resultado.html?status=pending&method=mercadopago`,
-      failure: `${baseUrl}/pago-resultado.html?status=failure&method=mercadopago`
+      success: `${baseUrl}/pago-resultado.html?prov=mercadopago&status=success&order=${ordParam}`,
+      pending: `${baseUrl}/pago-resultado.html?prov=mercadopago&status=pending&order=${ordParam}`,
+      failure: `${baseUrl}/pago-resultado.html?prov=mercadopago&status=failure&order=${ordParam}`
     };
 
     // Construir items de la preferencia

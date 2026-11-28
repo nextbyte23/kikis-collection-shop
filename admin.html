@@ -1421,6 +1421,10 @@ function renderOrders(){
   list.innerHTML = _orders.map(o => {
     const date = new Date(o.created_at).toLocaleString('es-MX', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
     const statusLabel = o.status.charAt(0).toUpperCase() + o.status.slice(1);
+    const carrierName = (o.carrier && window.CARRIERS && window.CARRIERS[o.carrier]) ? window.CARRIERS[o.carrier].name : (o.carrier || '');
+    const trackLine = o.tracking_number
+      ? `<div style="margin-top:6px;font-size:.76rem;color:#1e40af;background:#eef6ff;border:1px solid #cfe3ff;border-radius:6px;padding:4px 8px">📦 ${escapeHtml(carrierName)} · ${escapeHtml(o.tracking_number)}</div>`
+      : '';
     return `<div class="order-row">
       <div class="ord-id">#${o.id}</div>
       <div class="ord-customer">
@@ -1432,6 +1436,7 @@ function renderOrders(){
         <select onchange="changeOrderStatus(${o.id}, this.value)" style="margin-top:4px;width:100%;font-size:.78rem;padding:4px" aria-label="Cambiar estado">
           ${statusOptions.map(s => `<option value="${s}" ${s===o.status?'selected':''}>${s.charAt(0).toUpperCase()+s.slice(1)}</option>`).join('')}
         </select>
+        ${trackLine}
       </div>
       <div>
         <div class="ord-total">${fmtMoney(o.total)}</div>
@@ -1439,6 +1444,9 @@ function renderOrders(){
       </div>
       <div class="ord-actions">
         <button onclick="viewOrderDetail(${o.id})">👁 Detalle</button>
+        <button onclick="assignTracking(${o.id})">🚚 Asignar guía</button>
+        <button onclick="printShippingGuide(${o.id})">🖨 Imprimir guía</button>
+        ${o.customer_email ? `<button onclick="resendOrderEmail(${o.id})">✉️ Correo</button>` : ''}
         ${o.customer_phone ? `<button onclick="contactCustomer(${o.id})">💬 WhatsApp</button>` : ''}
       </div>
     </div>`;
@@ -1487,6 +1495,78 @@ function contactCustomer(id){
   if(phone.length === 10) phone = '52' + phone;
   const msg = `Hola ${o.customer_name}, soy de Kiki's Collection Shop. Sobre tu pedido #${o.id}…`;
   window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg), '_blank');
+}
+
+// Abre la guía de envío imprimible (estilo Amazon/Mercado Libre) en otra pestaña.
+function printShippingGuide(id){
+  window.open('guia-envio.html?order=' + id, '_blank', 'noopener');
+}
+
+// Reenvía el correo de resumen del pedido al cliente (server-side, vía Resend).
+async function resendOrderEmail(id){
+  if(!confirm('¿Reenviar el correo de resumen del pedido #' + id + ' al cliente?')) return;
+  try {
+    showToast('Enviando correo…');
+    const r = await KikiDB.resendOrderEmail(id);
+    if(r && r.skipped){
+      showToast('⚠ ' + (r.reason || 'No se pudo enviar (revisa RESEND_API_KEY y el email del cliente)'), true);
+    } else if(r && r.ok === false){
+      showToast('⚠ ' + (r.error || 'No se pudo enviar el correo'), true);
+    } else {
+      showToast('✓ Correo reenviado al cliente');
+    }
+  } catch(err){
+    showToast('No se pudo enviar: ' + (err.message || err), true);
+  }
+}
+
+// Modal para asignar transportista + número de guía. Al guardar, marca el
+// pedido como 'enviado' (vía KikiDB.setTracking) y el cliente verá el rastreo.
+function assignTracking(id){
+  const o = _orders.find(x => x.id === id);
+  if(!o) return;
+  const carriers = window.CARRIERS || {};
+  const opts = Object.keys(carriers).map(k =>
+    `<option value="${k}" ${o.carrier===k?'selected':''}>${escapeHtml(carriers[k].name)}</option>`
+  ).join('');
+  const overlay = document.createElement('div');
+  overlay.id = 'trackModal';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px';
+  overlay.innerHTML = `
+    <div style="background:var(--panel);color:var(--text);border-radius:12px;max-width:420px;width:100%;padding:22px;box-shadow:0 12px 40px rgba(0,0,0,.3);font-family:inherit">
+      <h3 style="margin:0 0 4px;color:var(--teal-deep);font-size:1.05rem">Asignar guía de envío</h3>
+      <p style="margin:0 0 14px;font-size:.82rem;color:#888">Pedido #${o.id} · ${escapeHtml(o.customer_name||'Invitado')}</p>
+      <label style="font-size:.78rem;font-weight:600;color:#888;display:block">Transportista</label>
+      <select id="trkCarrier" style="width:100%;padding:9px 10px;margin:4px 0 12px;border:1px solid var(--border);border-radius:8px;font-size:.9rem;background:#fff;color:#222">${opts}</select>
+      <label style="font-size:.78rem;font-weight:600;color:#888;display:block">Número de guía / rastreo</label>
+      <input id="trkNumber" type="text" value="${escapeHtml(o.tracking_number||'')}" placeholder="Ej: 1234567890" style="width:100%;padding:9px 10px;margin:4px 0 6px;border:1px solid var(--border);border-radius:8px;font-size:.9rem">
+      <p style="font-size:.76rem;color:#666;margin:0 0 14px">Al asignar la guía el pedido pasa a <b>Enviado</b> y el cliente verá el rastreo en su cuenta.</p>
+      <div style="display:flex;gap:8px">
+        <button id="trkCancel" style="flex:1;padding:10px;border:1px solid var(--border);background:transparent;color:#666;border-radius:8px;cursor:pointer">Cancelar</button>
+        <button id="trkSave" style="flex:1;padding:10px;background:var(--gold);color:#2a1500;border:0;border-radius:8px;font-weight:700;cursor:pointer">Asignar y marcar enviado</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  const close = () => overlay.remove();
+  overlay.addEventListener('click', e => { if(e.target === overlay) close(); });
+  overlay.querySelector('#trkCancel').onclick = close;
+  overlay.querySelector('#trkSave').onclick = async () => {
+    const carrier = overlay.querySelector('#trkCarrier').value;
+    const num = overlay.querySelector('#trkNumber').value.trim();
+    if(!num){ alert('Escribe el número de guía'); return; }
+    const saveBtn = overlay.querySelector('#trkSave');
+    saveBtn.textContent = 'Guardando…'; saveBtn.disabled = true;
+    try {
+      const upd = await KikiDB.setTracking(id, carrier, num);
+      const idx = _orders.findIndex(x => x.id === id);
+      if(idx >= 0){ _orders[idx] = { ..._orders[idx], carrier: upd.carrier, tracking_number: upd.tracking_number, shipped_at: upd.shipped_at, status: upd.status }; }
+      showToast('✓ Guía asignada · pedido marcado como enviado');
+      close(); renderOrders();
+    } catch(err){
+      saveBtn.textContent = 'Asignar y marcar enviado'; saveBtn.disabled = false;
+      alert('No se pudo asignar la guía: ' + (err.message || err));
+    }
+  };
 }
 
 // ============================================================
