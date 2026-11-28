@@ -1,0 +1,12 @@
+{
+  "name": "kikis-collection-shop",
+  "version": "1.0.0",
+  "description": "Tienda online de Kiki's Collection Shop - Pokémon TCG",
+  "private": true,
+  "dependencies": {
+    "stripe": "^14.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

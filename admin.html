@@ -1,0 +1,1764 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23fff' stroke='%23000' stroke-width='4'/%3E%3Cpath d='M2 50a48 48 0 0 1 96 0' fill='%23dc2626'/%3E%3Crect x='2' y='46' width='96' height='8' fill='%23000'/%3E%3Ccircle cx='50' cy='50' r='14' fill='%23fff' stroke='%23000' stroke-width='4'/%3E%3Ccircle cx='50' cy='50' r='6' fill='%23fff' stroke='%23000' stroke-width='3'/%3E%3C/svg%3E">
+<title>Admin · Kiki's Collection Shop</title>
+<style>
+  :root{
+    --teal:#0c5a66; --teal-dark:#083b44; --teal-deep:#052730;
+    --gold:#f2b501; --orange:#f59958;
+    --bg:#0a1416; --panel:#11242a; --panel-2:#163035;
+    --text:#eef5f6; --text-dim:#9fb3b8;
+    --sale:#e84545; --border:#1f3a41;
+    --green:#3ecf6f; --blue:#3b9eff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:'Segoe UI',Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;min-height:100vh}
+  a{color:inherit;text-decoration:none}
+  button{font-family:inherit}
+
+  /* ===== Login ===== */
+  .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+  .login-card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:32px;max-width:400px;width:100%;text-align:center}
+  .login-card h1{color:var(--gold);font-size:1.4rem;margin-bottom:6px}
+  .login-card p{color:var(--text-dim);font-size:0.85rem;margin-bottom:22px}
+  .login-card label{display:block;text-align:left;color:var(--text-dim);font-size:0.82rem;margin-bottom:6px}
+  .login-card input{width:100%;background:var(--panel-2);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:8px;margin-bottom:14px;font-size:0.92rem}
+  .login-card input:focus{outline:none;border-color:var(--gold)}
+  .login-card .btn-go{width:100%;background:var(--gold);color:#2a1500;border:0;padding:12px;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.95rem;transition:background .2s}
+  .login-card .btn-go:hover{background:var(--orange)}
+  .login-card .btn-go:disabled{opacity:.6;cursor:not-allowed}
+  .login-hint{margin-top:14px;font-size:0.72rem;color:var(--text-dim);padding:8px;background:var(--panel-2);border-radius:6px;border:1px dashed var(--border);text-align:left}
+  .login-hint b{color:var(--gold)}
+  .status-pill{display:inline-flex;align-items:center;gap:6px;font-size:0.72rem;padding:4px 10px;border-radius:999px;margin-bottom:14px}
+  .status-pill.online{background:rgba(62,207,111,.15);color:var(--green);border:1px solid var(--green)}
+  .status-pill.offline{background:rgba(245,153,88,.15);color:var(--orange);border:1px solid var(--orange)}
+  .status-pill .dot{width:7px;height:7px;border-radius:50%;background:currentColor;animation:pulse 1.6s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+  /* ===== Layout ===== */
+  .app{display:none}
+  .app.open{display:block}
+  .topbar{position:sticky;top:0;z-index:30;background:var(--teal-deep);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .topbar .brand{display:flex;align-items:center;gap:10px}
+  .topbar .brand .dot{width:36px;height:36px;border-radius:8px;background:var(--gold);color:#2a1500;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.1rem}
+  .topbar .brand b{color:var(--gold);font-size:1rem}
+  .topbar .brand small{display:block;color:var(--text-dim);font-size:0.7rem;letter-spacing:1px;text-transform:uppercase}
+  .topbar .actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .topbar .actions a, .topbar .actions button{background:var(--panel);border:1px solid var(--border);color:var(--text);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:0.82rem;transition:all .2s}
+  .topbar .actions a:hover, .topbar .actions button:hover{background:var(--teal);border-color:var(--gold);color:var(--gold)}
+  .topbar .user-info{display:flex;align-items:center;gap:8px;font-size:0.78rem;color:var(--text-dim)}
+  .topbar .user-info b{color:var(--gold)}
+
+  .tabs{background:var(--panel);border-bottom:1px solid var(--border);display:flex;gap:4px;padding:0 16px;overflow-x:auto}
+  .tabs button{background:transparent;border:0;border-bottom:3px solid transparent;color:var(--text-dim);padding:14px 18px;cursor:pointer;font-size:0.88rem;white-space:nowrap;transition:color .2s,border-color .2s}
+  .tabs button:hover{color:var(--text)}
+  .tabs button.active{color:var(--gold);border-bottom-color:var(--gold)}
+
+  .container{max-width:1200px;margin:0 auto;padding:24px 16px}
+  .section{display:none}
+  .section.active{display:block}
+
+  .section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+  .section-head h2{font-size:1.3rem;color:var(--gold);border-left:5px solid var(--orange);padding-left:12px}
+  .section-head .stats{display:flex;gap:14px;flex-wrap:wrap}
+  .section-head .stat{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:8px 14px;text-align:center;min-width:90px}
+  .section-head .stat b{display:block;color:var(--gold);font-size:1.3rem}
+  .section-head .stat span{font-size:0.7rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px}
+
+  .btn{background:var(--teal);color:#fff;border:0;padding:9px 16px;border-radius:8px;cursor:pointer;font-size:0.85rem;font-weight:600;transition:background .2s;display:inline-flex;align-items:center;gap:6px}
+  .btn:hover{background:var(--teal-dark)}
+  .btn.gold{background:var(--gold);color:#2a1500}
+  .btn.gold:hover{background:var(--orange)}
+  .btn.danger{background:var(--sale)}
+  .btn.danger:hover{background:#c93535}
+  .btn.ghost{background:transparent;border:1px solid var(--border);color:var(--text-dim)}
+  .btn.ghost:hover{border-color:var(--gold);color:var(--gold)}
+  .btn.small{padding:5px 10px;font-size:0.78rem}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+
+  /* Tablas */
+  .table-wrap{background:var(--panel);border:1px solid var(--border);border-radius:10px;overflow:hidden;overflow-x:auto}
+  table{width:100%;border-collapse:collapse;min-width:720px}
+  th,td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--border);font-size:0.85rem;vertical-align:middle}
+  th{background:var(--teal-deep);color:var(--gold);font-size:0.74rem;text-transform:uppercase;letter-spacing:1px;font-weight:600}
+  tr:last-child td{border-bottom:0}
+  tr:hover{background:var(--panel-2)}
+  td.name{max-width:260px}
+  td.actions{white-space:nowrap;text-align:right}
+  td .badge{font-size:0.65rem;padding:2px 7px;border-radius:4px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+  td .badge.in{background:var(--green);color:#062b14}
+  td .badge.out{background:#555;color:#ccc}
+  td .badge.best{background:var(--gold);color:#2a1500}
+  td .badge.new{background:var(--green);color:#062b14}
+  td .badge.sale{background:var(--sale);color:#fff}
+  td .badge.last{background:var(--orange);color:#2a1500}
+  .price-cell .now{color:var(--gold);font-weight:700}
+  .price-cell .was{color:var(--text-dim);text-decoration:line-through;font-size:0.78rem;margin-left:4px}
+
+  .search-row{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+  .search-row input, .search-row select{background:var(--panel);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:8px;font-size:0.85rem}
+  .search-row input{flex:1;min-width:200px}
+  .search-row input:focus, .search-row select:focus{outline:none;border-color:var(--gold)}
+
+  /* Modal */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:flex-start;justify-content:center;padding:30px 16px;overflow-y:auto;z-index:90}
+  .modal-overlay.open{display:flex}
+  .modal{background:var(--panel);border:1px solid var(--border);border-radius:14px;max-width:560px;width:100%;padding:24px;margin:auto}
+  .modal h3{color:var(--gold);margin-bottom:16px;font-size:1.15rem}
+  .modal .close-x{float:right;background:transparent;border:0;color:var(--text-dim);font-size:1.5rem;cursor:pointer;line-height:1}
+  .field{margin-bottom:14px}
+  .field label{display:block;color:var(--text-dim);font-size:0.82rem;margin-bottom:5px}
+  .field input, .field select, .field textarea{width:100%;background:var(--panel-2);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:8px;font-size:0.9rem;font-family:inherit}
+  .field input:focus, .field select:focus, .field textarea:focus{outline:none;border-color:var(--gold)}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:560px){.field-row{grid-template-columns:1fr}}
+  .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap}
+  .checkbox-field{display:flex;align-items:center;gap:8px}
+  .checkbox-field input{width:auto}
+  .checkbox-field label{margin:0;color:var(--text);font-size:0.9rem}
+
+  /* Campañas */
+  .campaign-card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:14px}
+  .campaign-card.active-camp{border-color:var(--gold);box-shadow:0 0 0 2px rgba(242,181,1,.15)}
+  .campaign-card .row1{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+  .campaign-card h4{color:var(--gold);font-size:1.05rem;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .campaign-card .type-tag{font-size:0.68rem;padding:3px 8px;border-radius:4px;background:var(--teal);color:#fff;text-transform:uppercase;letter-spacing:1px;font-weight:700}
+  .campaign-card .status{font-size:0.74rem;padding:4px 10px;border-radius:999px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+  .campaign-card .status.scheduled{background:var(--blue);color:#fff}
+  .campaign-card .status.active{background:var(--green);color:#062b14}
+  .campaign-card .status.ended{background:#555;color:#ccc}
+  .campaign-card .status.paused{background:var(--orange);color:#2a1500}
+  .campaign-card .meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;font-size:0.82rem;color:var(--text-dim);margin-bottom:10px}
+  .campaign-card .meta b{color:var(--text);display:block}
+  .campaign-card .scope-text{font-size:0.82rem;color:var(--text-dim);margin-bottom:10px;padding:8px 10px;background:var(--panel-2);border-radius:6px}
+  .campaign-card .actions-row{display:flex;gap:8px;flex-wrap:wrap}
+
+  /* Export/import */
+  .io-card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:14px}
+  .io-card h4{color:var(--gold);margin-bottom:8px;font-size:1rem}
+  .io-card p{color:var(--text-dim);font-size:0.84rem;margin-bottom:12px}
+
+  /* Toast */
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--green);color:#062b14;padding:10px 18px;border-radius:8px;font-weight:600;font-size:0.86rem;z-index:200;opacity:0;transition:transform .3s,opacity .3s;box-shadow:0 6px 18px rgba(0,0,0,.4)}
+  .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+  .toast.error{background:var(--sale);color:#fff}
+
+  .empty-state{text-align:center;padding:50px 20px;color:var(--text-dim)}
+  .empty-state .big{font-size:3rem;margin-bottom:10px}
+
+  /* Loading */
+  .loading{display:flex;align-items:center;justify-content:center;gap:10px;padding:40px;color:var(--text-dim);font-size:0.9rem}
+  .loading .spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* ===== Uploader de imagen ===== */
+  .img-uploader{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}
+  .img-preview{width:120px;height:120px;border:2px dashed var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--panel-2);flex-shrink:0;position:relative}
+  .img-preview img{width:100%;height:100%;object-fit:cover;border-radius:8px}
+  .img-preview .ph-emoji{font-size:2.4rem;opacity:.7}
+  .img-preview.has-img{border-style:solid;border-color:var(--gold)}
+  .img-preview .img-remove{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.7);color:#fff;border:0;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:0.9rem;line-height:1;display:flex;align-items:center;justify-content:center}
+  .img-preview .img-remove:hover{background:var(--sale)}
+  .img-actions{flex:1;min-width:180px}
+  .img-actions .hint{font-size:0.75rem;color:var(--text-dim);margin-top:6px;line-height:1.4}
+  .img-actions .hint b{color:var(--gold)}
+  .img-dropzone{border:2px dashed var(--border);border-radius:8px;padding:14px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;font-size:0.82rem;color:var(--text-dim)}
+  .img-dropzone:hover,.img-dropzone.dragover{border-color:var(--gold);background:rgba(242,181,1,.05);color:var(--gold)}
+  .img-dropzone .ico{font-size:1.4rem;display:block;margin-bottom:4px}
+  .img-actions input[type=file]{display:none}
+  .img-actions .btn-row{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+  .img-actions .upload-status{font-size:0.75rem;margin-top:6px;padding:6px 8px;border-radius:6px;display:none}
+  .img-actions .upload-status.show{display:block}
+  .img-actions .upload-status.error{background:rgba(232,69,69,.15);color:var(--sale);border:1px solid var(--sale)}
+  .img-actions .upload-status.ok{background:rgba(62,207,111,.15);color:var(--green);border:1px solid var(--green)}
+  .img-actions .upload-status.uploading{background:rgba(59,158,255,.15);color:var(--blue);border:1px solid var(--blue)}
+  /* Miniatura en tabla */
+  td .row-thumb{width:38px;height:38px;border-radius:6px;object-fit:cover;background:var(--panel-2);display:inline-block;vertical-align:middle}
+  td .row-thumb-emoji{width:38px;height:38px;border-radius:6px;background:var(--panel-2);display:inline-flex;align-items:center;justify-content:center;font-size:1.1rem;vertical-align:middle}
+
+  .info-banner{background:linear-gradient(135deg,var(--teal-deep),var(--teal-dark));border:1px solid var(--gold);border-radius:10px;padding:14px 18px;margin-bottom:18px;font-size:0.84rem;color:#fff8e7;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .info-banner b{color:var(--gold)}
+  .info-banner a{color:var(--gold);text-decoration:underline}
+
+  @media(max-width:560px){
+    .topbar .brand small{display:none}
+    .section-head .stat{min-width:70px;padding:6px 10px}
+    .section-head .stat b{font-size:1.1rem}
+  }
+
+  /* ===== Pedidos ===== */
+  .orders-grid{display:flex;flex-direction:column;gap:12px}
+  .order-row{background:#fff;border:1px solid #e5e2dc;border-radius:10px;padding:14px 16px;display:grid;grid-template-columns:80px 1fr 140px 160px 110px;gap:14px;align-items:center}
+  @media(max-width:760px){.order-row{grid-template-columns:1fr;gap:8px}}
+  .order-row .ord-id{font-weight:800;color:#2a2a2a;font-size:1rem}
+  .order-row .ord-customer .nm{font-weight:700;color:#2a2a2a;font-size:.92rem}
+  .order-row .ord-customer .ph{font-size:.78rem;color:#666;margin-top:2px}
+  .order-row .ord-total{font-weight:800;color:#736b54;font-size:1.05rem;text-align:right}
+  .order-row .ord-date{font-size:.78rem;color:#888;text-align:right}
+  .order-row .ord-actions{display:flex;gap:6px;flex-wrap:wrap}
+  .order-row .ord-actions button{font-size:.78rem;padding:6px 10px;cursor:pointer;border:1px solid #d4d0c8;background:#fff;border-radius:6px}
+  .order-row .ord-actions button:hover{background:#f7f6f3}
+  .ord-status-badge{display:inline-block;padding:3px 10px;border-radius:10px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.3px}
+  .ord-status-badge.pendiente{background:#fef3c7;color:#92400e}
+  .ord-status-badge.confirmado{background:#dbeafe;color:#1e40af}
+  .ord-status-badge.pagado{background:#dcfce7;color:#166534}
+  .ord-status-badge.enviado{background:#e0e7ff;color:#3730a3}
+  .ord-status-badge.entregado{background:#d1fae5;color:#065f46}
+  .ord-status-badge.cancelado{background:#fee2e2;color:#991b1b}
+  .empty-state{color:#888;font-size:.9rem;padding:24px;text-align:center}
+
+  /* ===== Cuentas bancarias ===== */
+  .bank-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+  .bank-card{background:#fff;border:1px solid #e5e2dc;border-radius:10px;padding:16px;position:relative}
+  .bank-card.inactive{opacity:.6}
+  .bank-card .bank-name{font-weight:800;color:#2a2a2a;font-size:1.05rem;margin-bottom:4px}
+  .bank-card .bank-holder{font-size:.85rem;color:#555;margin-bottom:8px}
+  .bank-card .bank-clabe{font-family:monospace;font-size:.95rem;color:#736b54;background:#f7f6f3;padding:6px 8px;border-radius:4px;letter-spacing:1px;word-break:break-all}
+  .bank-card .bank-meta{font-size:.75rem;color:#888;margin-top:6px}
+  .bank-card .bank-actions{position:absolute;top:10px;right:10px;display:flex;gap:4px}
+  .bank-card .bank-actions button{background:none;border:1px solid #d4d0c8;border-radius:4px;padding:4px 8px;font-size:.75rem;cursor:pointer}
+  .bank-card .bank-actions button:hover{background:#f7f6f3}
+  .bank-card .bank-flag{display:inline-block;padding:2px 8px;border-radius:8px;font-size:.7rem;font-weight:700;margin-top:8px}
+  .bank-flag.on{background:#dcfce7;color:#166534}
+  .bank-flag.off{background:#fee2e2;color:#991b1b}
+  .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+</style>
+<!-- Supabase JS SDK (solo se carga si config.js tiene credenciales) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>window.SEED_PRODUCTS = [{"id": 1, "name": "Mega draikai", "cat": "Boxes", "price": 2457.0, "sale": null, "stock": true, "badge": null}, {"id": 2, "name": "POKÉMON TCG 30TH CELEBRATION BINDER COLLECTION: Álbum de 9 bolsillos y 5 sobres", "cat": "Booster Bundle", "price": 1200.0, "sale": null, "stock": true, "badge": null}, {"id": 3, "name": "Élite Trainer Box DELTA REIGN", "cat": "Boxes", "price": 1850.0, "sale": null, "stock": true, "badge": "best"}, {"id": 4, "name": "Élite Trainer Box CHAOS RISING", "cat": "Boxes", "price": 1650.0, "sale": null, "stock": true, "badge": null}, {"id": 5, "name": "Élite Trainer Box PERFECT ORDER", "cat": "Boxes", "price": 1600.0, "sale": null, "stock": true, "badge": null}, {"id": 6, "name": "Build & Battle CHAOS RISING", "cat": "Boxes", "price": 1000.0, "sale": null, "stock": true, "badge": null}, {"id": 7, "name": "Mega Greninja ex Premium Collection", "cat": "Boxes", "price": 1700.0, "sale": 1500.0, "stock": false, "badge": null}, {"id": 8, "name": "Figura Pokemon Select - Deoxys", "cat": "Figuras", "price": 726.0, "sale": null, "stock": true, "badge": null}, {"id": 9, "name": "Figura Pokemon Select - Suicune", "cat": "Figuras", "price": 726.0, "sale": null, "stock": true, "badge": null}, {"id": 10, "name": "Bulbasaur Deluxe Select Figura de Vinilo 8 pulgadas", "cat": "Figuras", "price": 1088.0, "sale": null, "stock": true, "badge": null}, {"id": 11, "name": "Victini Illustration Collection - Español", "cat": "Boxes", "price": 726.0, "sale": null, "stock": true, "badge": null}, {"id": 12, "name": "Rival Battle Deck - Steven", "cat": "Boxes", "price": 750.0, "sale": null, "stock": false, "badge": null}, {"id": 13, "name": "Blisters mejorados de 2 unidades", "cat": "Sobres", "price": 647.0, "sale": null, "stock": false, "badge": "new"}, {"id": 14, "name": "Figura Pokemon Select - Drilbur", "cat": "Figuras", "price": 466.0, "sale": null, "stock": false, "badge": null}, {"id": 15, "name": "Figura Pokemon Select - Impidimp", "cat": "Figuras", "price": 466.0, "sale": null, "stock": true, "badge": null}, {"id": 16, "name": "Mega Battle Deck (Mega Diancie ex)", "cat": "Boxes", "price": 950.0, "sale": 889.0, "stock": true, "badge": "new"}, {"id": 17, "name": "Scarlet & Violet Prismatic Evolutions Surprise Box", "cat": "Boxes", "price": 1693.0, "sale": null, "stock": false, "badge": null}, {"id": 18, "name": "Mega Lucario ex Figure Collection", "cat": "Boxes", "price": 1404.0, "sale": null, "stock": false, "badge": null}, {"id": 19, "name": "Iono's Bellibolt ex Premium Collection - Español", "cat": "Boxes", "price": 967.0, "sale": null, "stock": true, "badge": "new"}, {"id": 20, "name": "Mega Evolution Booster Pack - 1 sobre", "cat": "Sobres", "price": 241.0, "sale": null, "stock": true, "badge": "best"}, {"id": 21, "name": "Scarlet & Violet Surging Spark - 1 sobre", "cat": "Sobres", "price": 200.0, "sale": 182.0, "stock": true, "badge": null}, {"id": 22, "name": "Scarlet & Violet Twilight Masquerade - 1 sobre", "cat": "Sobres", "price": 168.0, "sale": null, "stock": true, "badge": "best"}, {"id": 23, "name": "Scarlet & Violet Destined Rivals Booster - 1 sobre", "cat": "Sobres", "price": 242.0, "sale": null, "stock": true, "badge": "new"}, {"id": 24, "name": "Deck Box de cartas Pokémon Charizard X Mega Evolutions", "cat": "Boxes", "price": 242.0, "sale": null, "stock": false, "badge": null}, {"id": 25, "name": "Pokémon TCG Mega Evolutions Phantasmal Flames Booster Display", "cat": "Boxes", "price": 6000.0, "sale": 5710.0, "stock": false, "badge": null}, {"id": 26, "name": "Pokémon TCG Scarlet & Violet White Flare Binder Collection", "cat": "Boxes", "price": 1209.0, "sale": null, "stock": false, "badge": null}, {"id": 27, "name": "Pokémon TCG Mega Evolution Phantasmal Flames Build and Battle", "cat": "Boxes", "price": 1041.0, "sale": null, "stock": false, "badge": null}, {"id": 28, "name": "Pokémon TCG Scarlet & Violet Prismatic Evolutions Booster Bundle", "cat": "Booster Bundle", "price": 1769.0, "sale": null, "stock": false, "badge": "new"}, {"id": 29, "name": "Pokémon TCG Cofre coleccionista - otoño 2025", "cat": "Boxes", "price": 1200.0, "sale": 1088.0, "stock": false, "badge": "last"}, {"id": 30, "name": "Pokémon TCG Scarlet & Violet Black Bolt Elite Trainer Box", "cat": "Boxes", "price": 2500.0, "sale": 2178.0, "stock": false, "badge": "new"}, {"id": 31, "name": "Journey Together 3 Pack Blíster de 3 sobres Pokémon TCG", "cat": "Sobres", "price": 600.0, "sale": 526.35, "stock": false, "badge": "new"}, {"id": 32, "name": "Pokemon Select Figura de Acción Golisopod 6 pulgadas", "cat": "Figuras", "price": 907.5, "sale": null, "stock": false, "badge": null}, {"id": 33, "name": "Pokemon TCG Slashing Legends Tin (Zacian ex)", "cat": "Boxes", "price": 1250.0, "sale": 1087.79, "stock": false, "badge": "new"}, {"id": 34, "name": "Pokemon TCG Slashing Legends Tin (Koraidon ex)", "cat": "Boxes", "price": 1250.0, "sale": 1087.79, "stock": false, "badge": null}, {"id": 35, "name": "Pokemon Select Vaporeon Figura de Vinilo", "cat": "Figuras", "price": 568.7, "sale": null, "stock": false, "badge": null}, {"id": 36, "name": "Figura Pokemon Select - Chimchar", "cat": "Figuras", "price": 569.0, "sale": null, "stock": true, "badge": null}, {"id": 37, "name": "Pokémon Metallic - Charmander, Pikachu, Squirtle, Bulbasaur", "cat": "Figuras", "price": 1100.0, "sale": 993.41, "stock": true, "badge": "new"}, {"id": 38, "name": "Lugia Figura de Batalla Épica articulada 12 pulgadas con soporte de vuelo", "cat": "Figuras", "price": 1300.0, "sale": 1016.4, "stock": false, "badge": "new"}, {"id": 39, "name": "Charmander Deluxe Select Figura de Vinilo 8 pulgadas", "cat": "Figuras", "price": 1300.0, "sale": 1088.0, "stock": true, "badge": "new"}, {"id": 40, "name": "Snorlax ex & Blissey ex - Special Collection", "cat": "Boxes", "price": 1571.79, "sale": null, "stock": true, "badge": "new"}, {"id": 41, "name": "Prismatic Evolutions Pouch - Bolsa Eevee", "cat": "Boxes", "price": 1500.0, "sale": 1208.79, "stock": false, "badge": "new"}, {"id": 42, "name": "Venasaur ex & Blastoise ex - Premium Collection", "cat": "Boxes", "price": 2176.79, "sale": null, "stock": true, "badge": "best"}, {"id": 43, "name": "Mega Latias ex Box", "cat": "Boxes", "price": 845.79, "sale": null, "stock": true, "badge": "new"}, {"id": 44, "name": "Binder Collection - Black Bolt", "cat": "Boxes", "price": 1400.0, "sale": 1208.79, "stock": false, "badge": "last"}, {"id": 45, "name": "Binder Collection - Prismatic Evolutions", "cat": "Boxes", "price": 1400.0, "sale": 1329.79, "stock": false, "badge": "last"}, {"id": 46, "name": "Poster Collection - Black Bolt & White Flare", "cat": "Boxes", "price": 900.0, "sale": 845.79, "stock": false, "badge": "new"}, {"id": 47, "name": "Elite Trainer Box - White Flare", "cat": "Boxes", "price": 2286.9, "sale": null, "stock": false, "badge": "new"}, {"id": 48, "name": "Elite Trainer Box - Phantasmal Flames", "cat": "Boxes", "price": 1911.8, "sale": null, "stock": false, "badge": "best"}, {"id": 49, "name": "Elite Trainer Box - Mega Evolution (Gardevoir)", "cat": "Boxes", "price": 1996.5, "sale": null, "stock": false, "badge": "new"}, {"id": 50, "name": "Elite Trainer Box - Mega Evolution (Lucario)", "cat": "Boxes", "price": 2055.79, "sale": null, "stock": false, "badge": "new"}, {"id": 51, "name": "Cynthia's Garchomp ex - Premium Collection", "cat": "Boxes", "price": 1197.9, "sale": null, "stock": true, "badge": "new"}, {"id": 52, "name": "Charizard ex Super-Premium Collection", "cat": "Boxes", "price": 2800.0, "sale": 2781.79, "stock": false, "badge": "sale"}, {"id": 53, "name": "Iono's Bellibolt ex - Premium Collection", "cat": "Boxes", "price": 1087.79, "sale": null, "stock": true, "badge": "new"}, {"id": 54, "name": "Mega Battle - Deck Mega Gengar ex", "cat": "Boxes", "price": 1114.41, "sale": null, "stock": false, "badge": "new"}, {"id": 55, "name": "Mega Kangaskhan ex Box", "cat": "Boxes", "price": 724.79, "sale": null, "stock": true, "badge": "new"}, {"id": 56, "name": "Trainer Toolkit 2025", "cat": "Boxes", "price": 1500.0, "sale": 1450.79, "stock": false, "badge": "sale"}, {"id": 57, "name": "Phantasmal Flames 3-pack + 1 Blister aleatorio (Weavile o Sneasel)", "cat": "Sobres", "price": 724.79, "sale": null, "stock": false, "badge": "last"}, {"id": 58, "name": "Stellar Crown - Booster Box", "cat": "Boxes", "price": 1100.0, "sale": 919.6, "stock": true, "badge": null}, {"id": 59, "name": "White Flare - Booster Bundle", "cat": "Booster Bundle", "price": 1161.6, "sale": null, "stock": false, "badge": "new"}, {"id": 60, "name": "Journey Together - Booster Box", "cat": "Boxes", "price": 919.6, "sale": null, "stock": true, "badge": "new"}, {"id": 61, "name": "Journey Together - Booster Bundle", "cat": "Booster Bundle", "price": 1040.6, "sale": null, "stock": false, "badge": null}, {"id": 62, "name": "Mega Evolution - Booster Bundle", "cat": "Booster Bundle", "price": 1161.6, "sale": null, "stock": false, "badge": null}, {"id": 63, "name": "Black Bolt - Booster Bundle", "cat": "Booster Bundle", "price": 1210.0, "sale": null, "stock": false, "badge": "new"}, {"id": 64, "name": "Sobre Scarlet & Violet Temporal Forces - 1 sobre", "cat": "Sobres", "price": 109.0, "sale": null, "stock": false, "badge": null}, {"id": 65, "name": "Sobre Scarlet & Violet Prismatic Evolutions - 1 sobre", "cat": "Sobres", "price": 195.0, "sale": 179.0, "stock": false, "badge": "best"}, {"id": 66, "name": "Sobre Scarlet & Violet Paradox Rift - 1 sobre", "cat": "Sobres", "price": 120.0, "sale": null, "stock": false, "badge": "best"}, {"id": 67, "name": "Lata Poké Ball - diseño aleatorio", "cat": "Boxes", "price": 650.0, "sale": 603.79, "stock": false, "badge": "sale"}, {"id": 68, "name": "Phantasmal Flames Ultra Premium Collection Mega Charizard ex", "cat": "Boxes", "price": 3811.5, "sale": null, "stock": false, "badge": "new"}, {"id": 69, "name": "Pack Pokémon Prismatic Evolutions ETB & Poké Ball Booster", "cat": "Boxes", "price": 2583.35, "sale": null, "stock": false, "badge": "new"}, {"id": 70, "name": "Prismatic Evolutions Elite Trainer Box", "cat": "Boxes", "price": 3000.0, "sale": 2904.0, "stock": false, "badge": "new"}];</script>
+<script src="supabase-client.js"></script>
+</head>
+<body>
+
+<!-- ===== Login ===== -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login-card">
+    <h1>🔐 Panel de Administración</h1>
+    <p>Kiki's Collection Shop</p>
+    <div id="loginStatus"></div>
+    <form onsubmit="doLogin(event)">
+      <div id="emailField" style="display:none">
+        <label for="email">Correo electrónico</label>
+        <input type="email" id="email" placeholder="admin@kikicollectionstore.com">
+      </div>
+      <label for="pw" id="pwLabel">Contraseña</label>
+      <input type="password" id="pw" autocomplete="current-password" placeholder="Ingresa tu contraseña" autofocus>
+      <button type="submit" class="btn-go" id="loginBtn">Entrar</button>
+    </form>
+    <div class="login-hint" id="loginHint">
+      <b>Modo demo (sin backend):</b> contraseña <code>kiki2026</code><br>
+      <small>Para producción, configura Supabase en <code>config.js</code> y crea tu usuario en Supabase → Authentication → Users → Add user.</small>
+    </div>
+  </div>
+</div>
+
+<!-- ===== App ===== -->
+<div class="app" id="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="dot">K</div>
+      <div>
+        <b>Kiki's Collection Shop</b>
+        <small>Panel de administración</small>
+      </div>
+    </div>
+    <div class="actions">
+      <div class="user-info">
+        <span class="status-pill" id="connPill"><span class="dot"></span><span id="connText">—</span></span>
+        <span>👤 <b id="userEmail">—</b></span>
+      </div>
+      <a href="kikis_collection_store.html" target="_blank">👁 Ver tienda</a>
+      <button onclick="exportData()">⬇ Exportar</button>
+      <button onclick="document.getElementById('importFile').click()">⬆ Importar</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+      <button onclick="logout()" class="btn ghost small">Salir</button>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="active" data-tab="dashboard" onclick="switchSection('dashboard')">📊 Dashboard</button>
+    <button data-tab="products" onclick="switchSection('products')">📦 Productos</button>
+    <button data-tab="hero" onclick="switchSection('hero')">🖼️ Banner</button>
+    <button data-tab="campaigns" onclick="switchSection('campaigns')">🎯 Campañas</button>
+    <button data-tab="orders" onclick="switchSection('orders')">🛒 Pedidos</button>
+    <button data-tab="bankaccounts" onclick="switchSection('bankaccounts')">🏦 Cuentas</button>
+    <button data-tab="io" onclick="switchSection('io')">💾 Respaldo</button>
+  </nav>
+
+  <main class="container">
+    <!-- DASHBOARD -->
+    <section class="section active" id="dashboard">
+      <div class="section-head">
+        <h2>Dashboard</h2>
+      </div>
+      <div class="info-banner" id="dashBanner">
+        <span>ℹ️</span><span id="dashBannerText">Cargando estado de conexión…</span>
+      </div>
+      <div class="section-head">
+        <div class="stats">
+          <div class="stat"><b id="stTotal">—</b><span>Productos</span></div>
+          <div class="stat"><b id="stStock">—</b><span>En stock</span></div>
+          <div class="stat"><b id="stOut">—</b><span>Agotados</span></div>
+          <div class="stat"><b id="stUnits">—</b><span>Unidades totales</span></div>
+          <div class="stat"><b id="stCamps">—</b><span>Campañas</span></div>
+          <div class="stat"><b id="stActiveCamps">—</b><span>Activas</span></div>
+        </div>
+      </div>
+      <div class="io-card">
+        <h4>📈 Próximas y activas</h4>
+        <div id="dashCamps"><div class="loading"><div class="spinner"></div>Cargando…</div></div>
+      </div>
+      <div class="io-card">
+        <h4>⚡ Acciones rápidas</h4>
+        <p>Crear campañas preconfiguradas con las fechas típicas del año:</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn gold" onclick="quickCampaign('buenfin')">🟠 Buen Fin</button>
+          <button class="btn gold" onclick="quickCampaign('blackfriday')">⚫ Black Friday</button>
+          <button class="btn gold" onclick="quickCampaign('navidad')">🎄 Navidad</button>
+          <button class="btn" onclick="openCampaignModal()">➕ Personalizada</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRODUCTOS -->
+    <section class="section" id="products">
+      <div class="section-head">
+        <h2>Productos</h2>
+        <button class="btn gold" onclick="openProductModal()">➕ Nuevo producto</button>
+      </div>
+      <div class="search-row">
+        <input type="search" id="prodSearch" placeholder="Buscar por nombre…" oninput="renderProducts()">
+        <select id="prodCatFilter" onchange="renderProducts()">
+          <option value="">Todas las categorías</option>
+          <option>Boxes</option><option>Sobres</option><option>Booster Bundle</option><option>Figuras</option><option>Cartas individuales</option>
+        </select>
+        <select id="prodStockFilter" onchange="renderProducts()">
+          <option value="">Todos</option>
+          <option value="in">En stock</option>
+          <option value="out">Agotados</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>ID</th><th>Img</th><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Oferta</th><th>Inventario</th><th>Badge</th><th style="text-align:right">Acciones</th></tr>
+          </thead>
+          <tbody id="prodTbody"><tr><td colspan="9"><div class="loading"><div class="spinner"></div>Cargando…</div></td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- HERO / BANNER -->
+    <section class="section" id="hero">
+      <div class="section-head">
+        <h2>Banner principal (Hero)</h2>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn primary" onclick="heroAddSlide()">+ Nuevo slide</button>
+          <button class="btn" onclick="heroResetDefault()">↺ Restaurar por defecto</button>
+        </div>
+      </div>
+      <div class="info-banner" style="margin-bottom:14px">
+        <span>ℹ️</span><span>Edita los slides del banner principal de la tienda. Los cambios se guardan automáticamente y se reflejan al instante en la página pública.</span>
+      </div>
+      <div id="heroSlidesContainer"></div>
+    </section>
+
+    <!-- CAMPAÑAS -->
+    <section class="section" id="campaigns">
+      <div class="section-head">
+        <h2>Campañas y Descuentos</h2>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn gold" onclick="quickCampaign('buenfin')">🟠 Buen Fin</button>
+          <button class="btn gold" onclick="quickCampaign('blackfriday')">⚫ Black Friday</button>
+          <button class="btn gold" onclick="quickCampaign('navidad')">🎄 Navidad</button>
+          <button class="btn" onclick="openCampaignModal()">➕ Personalizada</button>
+        </div>
+      </div>
+      <div class="info-banner">
+        <span>⏱️</span><span>El estado se calcula <b>automáticamente</b> según las fechas. <b style="color:var(--green)">Activa</b> si hoy está entre inicio y fin; <b style="color:var(--blue)">Programada</b> si aún no inicia; <b>Finalizada</b> si ya pasó.</span>
+      </div>
+      <div id="campaignsList"><div class="loading"><div class="spinner"></div>Cargando…</div></div>
+    </section>
+
+    <!-- RESPALDO -->
+    <section class="section" id="io">
+      <div class="section-head">
+        <h2>Respaldo y Migración</h2>
+      </div>
+      <div class="io-card">
+        <h4>⬇ Exportar datos</h4>
+        <p>Descarga todos los productos y campañas en un JSON. Útil para respaldo o migración.</p>
+        <button class="btn gold" onclick="exportData()">Descargar kiki_data.json</button>
+      </div>
+      <div class="io-card">
+        <h4>⬆ Importar datos</h4>
+        <p>Carga un JSON previamente exportado. <b>Esto reemplaza todos los datos actuales.</b></p>
+        <button class="btn" onclick="document.getElementById('importFile2').click()">Seleccionar archivo JSON</button>
+        <input type="file" id="importFile2" accept=".json" style="display:none" onchange="importData(event)">
+      </div>
+      <div class="io-card" id="resetCard">
+        <h4>♻️ Restablecer catálogo inicial</h4>
+        <p id="resetHelp">Vuelve a cargar los 70 productos iniciales.</p>
+        <button class="btn danger" onclick="resetData()">Restablecer</button>
+      </div>
+    </section>
+
+    <!-- PEDIDOS -->
+    <section class="section" id="orders">
+      <div class="section-head">
+        <h2>Pedidos</h2>
+        <button class="btn" onclick="loadOrders()">🔄 Refrescar</button>
+      </div>
+      <div id="ordersList" class="orders-grid">
+        <p class="empty-state">Cargando pedidos…</p>
+      </div>
+    </section>
+
+    <!-- CUENTAS BANCARIAS -->
+    <section class="section" id="bankaccounts">
+      <div class="section-head">
+        <h2>Cuentas bancarias</h2>
+        <div style="display:flex;gap:8px">
+          <button class="btn" onclick="loadBankAccounts()">🔄 Refrescar</button>
+          <button class="btn gold" onclick="openBankAccountModal()">+ Nueva cuenta</button>
+        </div>
+      </div>
+      <p style="color:#666;font-size:.9rem;margin:0 0 12px">Estas cuentas se mostrarán a los clientes cuando actives la opción de pago por transferencia. Por ahora no aparecen en el checkout (pago solo por WhatsApp).</p>
+      <div id="bankAccountsList" class="bank-grid">
+        <p class="empty-state">Cargando cuentas…</p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Modal Cuenta Bancaria -->
+<div class="modal-overlay" id="bankModal">
+  <div class="modal">
+    <button class="close-x" onclick="closeModal('bankModal')">×</button>
+    <h3 id="bankModalTitle">Nueva cuenta bancaria</h3>
+    <input type="hidden" id="bankId">
+    <div class="field">
+      <label>Banco *</label>
+      <input type="text" id="bankName" placeholder="Ej: BBVA México">
+    </div>
+    <div class="field">
+      <label>Titular de la cuenta *</label>
+      <input type="text" id="bankHolder" placeholder="Nombre como aparece en el estado de cuenta">
+    </div>
+    <div class="field">
+      <label>CLABE interbancaria (18 dígitos) *</label>
+      <input type="text" id="bankClabe" maxlength="18" placeholder="012180000000000000">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Últimos 4 dígitos de tarjeta (opcional)</label>
+        <input type="text" id="bankCardLast4" maxlength="4" placeholder="1234">
+      </div>
+      <div class="field">
+        <label>Tipo de cuenta</label>
+        <select id="bankType">
+          <option value="transferencia">Transferencia / SPEI</option>
+          <option value="spei">SPEI</option>
+          <option value="tarjeta">Tarjeta</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Orden (menor = aparece primero)</label>
+        <input type="number" id="bankSort" value="1" min="0" max="99">
+      </div>
+      <div class="field">
+        <label>Activa</label>
+        <select id="bankActive">
+          <option value="true">Sí — visible para clientes</option>
+          <option value="false">No — oculta temporalmente</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal('bankModal')">Cancelar</button>
+      <button class="btn gold" onclick="saveBankAccount()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Producto -->
+<div class="modal-overlay" id="prodModal">
+  <div class="modal">
+    <button class="close-x" onclick="closeModal('prodModal')">×</button>
+    <h3 id="prodModalTitle">Nuevo producto</h3>
+    <input type="hidden" id="prodId">
+    <div class="field">
+      <label>Nombre del producto *</label>
+      <input type="text" id="prodName" placeholder="Ej: Élite Trainer Box - Prismatic Evolutions">
+    </div>
+    <div class="field">
+      <label>Descripción</label>
+      <textarea id="prodDesc" rows="3" placeholder="Ej: Contenido de la caja, número de sobres, condición de la carta, existencias, etc. Esta descripción se muestra en la tienda antes de agregar al carrito."></textarea>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Categoría *</label>
+        <select id="prodCat">
+          <option>Boxes</option><option>Sobres</option><option>Booster Bundle</option><option>Figuras</option><option>Cartas individuales</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Badge (opcional)</label>
+        <select id="prodBadge">
+          <option value="">(ninguno)</option>
+          <option value="best">Más vendido</option>
+          <option value="new">Nuevo</option>
+          <option value="sale">Oferta</option>
+          <option value="last">Últimas piezas</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Precio (MXN) *</label>
+        <input type="number" id="prodPrice" step="0.01" min="0" placeholder="0.00">
+      </div>
+      <div class="field">
+        <label>Precio de oferta (MXN)</label>
+        <input type="number" id="prodSale" step="0.01" min="0" placeholder="Dejar vacío si no hay oferta">
+      </div>
+    </div>
+    <div class="field">
+      <label>Imagen del producto</label>
+      <div class="img-uploader">
+        <div class="img-preview" id="imgPreview">
+          <span class="ph-emoji" id="imgPhEmoji">📦</span>
+        </div>
+        <div class="img-actions">
+          <input type="file" id="prodImageFile" accept="image/jpeg,image/png,image/webp,image/gif">
+          <div class="img-dropzone" id="imgDropzone" onclick="document.getElementById('prodImageFile').click()">
+            <span class="ico">🖼️</span>
+            <span id="imgDropText">Haz clic o arrastra una imagen aquí</span>
+          </div>
+          <div class="hint">
+            Formatos: <b>JPG, PNG, WebP, GIF</b> · Máximo <b>5 MB</b><br>
+            Se recomienda imagen cuadrada (ej: 800×800px).<br>
+            <span id="imgOfflineHint" style="display:none;color:var(--orange)">⚠ Modo offline: la subida a Supabase no está disponible. Selecciona una imagen para vista previa local.</span>
+          </div>
+          <div class="upload-status" id="uploadStatus"></div>
+        </div>
+      </div>
+      <input type="hidden" id="prodImageUrl" value="">
+      <input type="hidden" id="prodImageDeleted" value="0">
+    </div>
+    <div class="checkbox-field">
+      <label for="prodStockQty">Cantidad en stock</label>
+      <input type="number" id="prodStockQty" min="0" step="1" value="0" inputmode="numeric">
+      <p class="hint">0 = agotado · Si hay ≥1 unidad, el producto aparece como disponible en la tienda.</p>
+    </div>
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeModal('prodModal')">Cancelar</button>
+      <button class="btn gold" id="saveProdBtn" onclick="saveProduct()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Campaña -->
+<div class="modal-overlay" id="campModal">
+  <div class="modal">
+    <button class="close-x" onclick="closeModal('campModal')">×</button>
+    <h3 id="campModalTitle">Nueva campaña</h3>
+    <input type="hidden" id="campId">
+    <div class="field">
+      <label>Nombre de la campaña *</label>
+      <input type="text" id="campName" placeholder="Ej: Buen Fin 2026">
+    </div>
+    <div class="field">
+      <label>Tipo</label>
+      <select id="campType">
+        <option value="buenfin">🟠 Buen Fin</option>
+        <option value="blackfriday">⚫ Black Friday</option>
+        <option value="navidad">🎄 Ventas de Navidad</option>
+        <option value="personalizada">⭐ Personalizada</option>
+      </select>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Fecha de inicio *</label>
+        <input type="datetime-local" id="campStart">
+      </div>
+      <div class="field">
+        <label>Fecha de fin *</label>
+        <input type="datetime-local" id="campEnd">
+      </div>
+    </div>
+    <div class="field">
+      <label>Descuento (% sobre el precio actual) *</label>
+      <input type="number" id="campDiscount" min="1" max="99" step="1" placeholder="Ej: 15">
+    </div>
+    <div class="field">
+      <label>¿A qué productos aplica?</label>
+      <select id="campScope" onchange="toggleScope(this.value)">
+        <option value="all">Todos los productos</option>
+        <option value="category">Por categoría</option>
+        <option value="selected">Productos específicos</option>
+      </select>
+    </div>
+    <div class="field" id="scopeCategoryField" style="display:none">
+      <label>Categoría</label>
+      <select id="campCategory">
+        <option>Boxes</option><option>Sobres</option><option>Booster Bundle</option><option>Figuras</option>
+      </select>
+    </div>
+    <div class="field" id="scopeSelectedField" style="display:none">
+      <label>Selecciona los productos</label>
+      <div id="campProductsList" style="max-height:200px;overflow-y:auto;background:var(--panel-2);border:1px solid var(--border);border-radius:8px;padding:8px"></div>
+    </div>
+    <div class="checkbox-field">
+      <input type="checkbox" id="campBanner" checked>
+      <label for="campBanner">Mostrar banner promocional en la tienda</label>
+    </div>
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeModal('campModal')">Cancelar</button>
+      <button class="btn gold" id="saveCampBtn" onclick="saveCampaign()">Guardar campaña</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== Estado en memoria (cache) =====
+let _products = [];
+let _campaigns = [];
+
+const CAMP_LABELS = {
+  buenfin:    {label:"Buen Fin",        emoji:"🟠"},
+  blackfriday:{label:"Black Friday",    emoji:"⚫"},
+  navidad:    {label:"Navidad",         emoji:"🎄"},
+  personalizada:{label:"Personalizada", emoji:"⭐"}
+};
+
+// ===== Auth =====
+async function doLogin(e){
+  e.preventDefault();
+  const btn = document.getElementById("loginBtn");
+  const pw = document.getElementById("pw").value;
+  const email = document.getElementById("email").value.trim();
+  btn.disabled = true; btn.textContent = "Entrando…";
+  try {
+    const data = await KikiDB.signIn(email, pw);
+    showToast("Bienvenido" + (data && data.user && data.user.email ? ", " + data.user.email : ""));
+    await showApp();
+  } catch(err) {
+    showToast("Error: " + (err.message || "no se pudo iniciar sesión"), true);
+  } finally {
+    btn.disabled = false; btn.textContent = "Entrar";
+  }
+}
+
+async function logout(){
+  await KikiDB.signOut();
+  document.getElementById("app").classList.remove("open");
+  document.getElementById("loginWrap").style.display = "flex";
+  document.getElementById("pw").value = "";
+  document.getElementById("email").value = "";
+}
+
+async function checkAuthAndShowApp(){
+  const session = await KikiDB.getSession();
+  if(session && session.user){
+    await showApp();
+  } else {
+    updateLoginUI();           // ← mostrar/ocultar campo email según modo online/offline
+    document.getElementById("loginWrap").style.display = "flex";
+  }
+}
+
+// Configura la UI del formulario de login según si Supabase está conectado o no.
+// En modo online requiere email + contraseña; en modo offline solo contraseña (kiki2026).
+function updateLoginUI(){
+  const online = KikiDB.isOnline();
+  const emailField = document.getElementById("emailField");
+  const pwLabel = document.getElementById("pwLabel");
+  const hint = document.getElementById("loginHint");
+  if(online){
+    emailField.style.display = "block";
+    pwLabel.textContent = "Contraseña de tu cuenta";
+    hint.innerHTML = "<b>Modo Supabase:</b> ingresa el correo y contraseña que creaste en Supabase → Authentication → Users.";
+  } else {
+    emailField.style.display = "none";
+    pwLabel.textContent = "Contraseña";
+    hint.innerHTML = "<b>Modo demo (sin backend):</b> contraseña <code>kiki2026</code><br><small>Para producción, configura Supabase en <code>config.js</code> y crea tu usuario en Supabase → Authentication → Users.</small>";
+  }
+}
+
+async function showApp(){
+  // Configurar UI según modo online/offline
+  const online = KikiDB.isOnline();
+  const pill = document.getElementById("connPill");
+  const connText = document.getElementById("connText");
+  if(online){
+    pill.className = "status-pill online";
+    connText.textContent = "Supabase conectado";
+  } else {
+    pill.className = "status-pill offline";
+    connText.textContent = "Modo local (sin backend)";
+  }
+  // Reutiliza la misma lógica del formulario de login (campo email visible/oculto)
+  updateLoginUI();
+  if(online){
+    document.getElementById("dashBannerText").innerHTML = "Conectado a <b>Supabase</b>. Los cambios se sincronizan con la base de datos en la nube y se reflejan en la <a href='kikis_collection_store.html' target='_blank'>tienda pública</a>.";
+    document.getElementById("resetHelp").textContent = "En modo Supabase, ejecuta schema.sql de nuevo en el SQL Editor para restablecer.";
+    document.getElementById("resetCard").querySelector("button").textContent = "Ver instrucciones";
+  } else {
+    document.getElementById("dashBannerText").innerHTML = "Estás en <b>modo local</b> (sin backend). Los datos se guardan solo en este navegador. Para sincronizar con la tienda pública en línea, configura <code>config.js</code> con tus credenciales de Supabase.";
+  }
+
+  document.getElementById("loginWrap").style.display = "none";
+  document.getElementById("app").classList.add("open");
+
+  // Mostrar email del usuario
+  const session = await KikiDB.getSession();
+  if(session && session.user){
+    document.getElementById("userEmail").textContent = session.user.email || "admin";
+  } else {
+    document.getElementById("userEmail").textContent = "admin@local";
+  }
+
+  // Cargar datos
+  await refreshAll();
+}
+
+// ===== Carga de datos =====
+async function refreshAll(){
+  try {
+    _products = await KikiDB.listProducts();
+    _campaigns = await KikiDB.listCampaigns();
+  } catch(err){
+    console.error("Error cargando datos:", err);
+    showToast("Error al cargar datos: " + err.message, true);
+    _products = []; _campaigns = [];
+  }
+  renderDashboard();
+  renderProducts();
+  renderCampaigns();
+}
+
+// ===== Render dashboard =====
+function renderDashboard(){
+  const inStock = _products.filter(p => (p.stock_quantity != null ? p.stock_quantity : (p.stock ? 10 : 0)) > 0).length;
+  const totalUnits = _products.reduce((s, p) => s + (p.stock_quantity != null ? p.stock_quantity : (p.stock ? 10 : 0)), 0);
+  const activeCamps = _campaigns.filter(c=>campStatus(c)==="active").length;
+  document.getElementById("stTotal").textContent = _products.length;
+  document.getElementById("stStock").textContent = inStock;
+  document.getElementById("stOut").textContent = _products.length - inStock;
+  // Si existe el elemento de unidades totales, lo actualizamos
+  const stUnits = document.getElementById("stUnits");
+  if(stUnits) stUnits.textContent = totalUnits;
+  document.getElementById("stCamps").textContent = _campaigns.length;
+  document.getElementById("stActiveCamps").textContent = activeCamps;
+
+  const upcoming = _campaigns
+    .map(c=>({...c, status: campStatus(c)}))
+    .sort((a,b)=> new Date(a.start) - new Date(b.start));
+  const list = document.getElementById("dashCamps");
+  if(upcoming.length === 0){
+    list.innerHTML = '<p style="color:var(--text-dim);font-size:0.86rem">No hay campañas creadas. Usa los botones de abajo para crear una.</p>';
+    return;
+  }
+  list.innerHTML = upcoming.map(c=>{
+    const lbl = CAMP_LABELS[c.type] || CAMP_LABELS.personalizada;
+    return `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);flex-wrap:wrap">
+      <div><span style="font-size:1.1rem">${lbl.emoji}</span> <b style="color:var(--gold)">${escapeHtml(c.name)}</b>
+        <span class="status ${c.status}" style="font-size:0.72rem;padding:3px 8px;border-radius:999px;font-weight:700;text-transform:uppercase">${c.status==='active'?'Activa':c.status==='scheduled'?'Programada':c.status==='paused'?'Pausada':'Finalizada'}</span>
+      </div>
+      <div style="font-size:0.8rem;color:var(--text-dim)">
+        ${fmtDate(c.start)} → ${fmtDate(c.end)} · <b style="color:var(--gold)">-${c.discount}%</b>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+// ===== Render productos =====
+function renderProducts(){
+  const q = (document.getElementById("prodSearch").value||"").toLowerCase().trim();
+  const cat = document.getElementById("prodCatFilter").value;
+  const stk = document.getElementById("prodStockFilter").value;
+  let filtered = _products.filter(p=>{
+    if(q && !p.name.toLowerCase().includes(q)) return false;
+    if(cat && p.cat !== cat) return false;
+    const qty = (p.stock_quantity != null) ? p.stock_quantity : (p.stock ? 10 : 0);
+    if(stk === "in" && qty <= 0) return false;
+    if(stk === "out" && qty > 0) return false;
+    return true;
+  });
+  filtered.sort((a,b)=>a.id-b.id);
+  const tbody = document.getElementById("prodTbody");
+  if(filtered.length === 0){
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--text-dim)">Sin resultados. <a href="#" onclick="openProductModal();return false" style="color:var(--gold)">Agregar producto →</a></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = filtered.map(p=>{
+    const badgeMap = {best:"Más vendido",new:"Nuevo",sale:"Oferta",last:"Últimas piezas"};
+    const badgeHtml = p.badge ? `<span class="badge ${p.badge}">${badgeMap[p.badge]||p.badge}</span>` : '<span style="color:var(--text-dim)">—</span>';
+    const qty = (p.stock_quantity != null) ? p.stock_quantity : (p.stock ? 10 : 0);
+    const stockHtml = qty > 0
+      ? `<span class="badge in">${qty} en stock</span>`
+      : '<span class="badge out">Agotado</span>';
+    const priceHtml = (p.sale != null && p.sale !== "")
+      ? `<div class="price-cell"><span class="now">${fmtMoney(p.sale)}</span><span class="was">${fmtMoney(p.price)}</span></div>`
+      : `<div class="price-cell"><span class="now">${fmtMoney(p.price)}</span></div>`;
+    const emoji = CAT_EMOJI[p.cat] || "📦";
+    const thumbHtml = p.image_url
+      ? `<img class="row-thumb" src="${escapeAttr(p.image_url)}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><span class="row-thumb-emoji" style="display:none">${emoji}</span>`
+      : `<span class="row-thumb-emoji">${emoji}</span>`;
+    return `<tr>
+      <td>#${p.id}</td>
+      <td>${thumbHtml}</td>
+      <td class="name">${escapeHtml(p.name)}</td>
+      <td>${p.cat}</td>
+      <td>${priceHtml}</td>
+      <td>${p.sale!=null && p.sale!==""?fmtMoney(p.sale):'<span style="color:var(--text-dim)">—</span>'}</td>
+      <td>${stockHtml}</td>
+      <td>${badgeHtml}</td>
+      <td class="actions">
+        <button class="btn small" onclick="editProduct(${p.id})">✎</button>
+        <button class="btn small danger" onclick="deleteProduct(${p.id})">🗑</button>
+      </td>
+    </tr>`;
+  }).join("");
+}
+
+function openProductModal(){
+  document.getElementById("prodModalTitle").textContent = "Nuevo producto";
+  document.getElementById("prodId").value = "";
+  document.getElementById("prodName").value = "";
+  document.getElementById("prodDesc").value = "";
+  document.getElementById("prodCat").value = "Boxes";
+  document.getElementById("prodBadge").value = "";
+  document.getElementById("prodPrice").value = "";
+  document.getElementById("prodSale").value = "";
+  document.getElementById("prodStockQty").value = 0;
+  resetImageUploader();
+  openModal("prodModal");
+}
+
+function editProduct(id){
+  const p = _products.find(x=>x.id===id);
+  if(!p) return;
+  document.getElementById("prodModalTitle").textContent = "Editar producto #"+id;
+  document.getElementById("prodId").value = p.id;
+  document.getElementById("prodName").value = p.name;
+  document.getElementById("prodDesc").value = p.description || "";
+  document.getElementById("prodCat").value = p.cat;
+  document.getElementById("prodBadge").value = p.badge || "";
+  document.getElementById("prodPrice").value = p.price;
+  document.getElementById("prodSale").value = (p.sale==null?"":p.sale);
+  document.getElementById("prodStockQty").value = (p.stock_quantity != null) ? p.stock_quantity : (p.stock ? 10 : 0);
+  resetImageUploader();
+  if(p.image_url){
+    showImagePreview(p.image_url);
+    document.getElementById("prodImageUrl").value = p.image_url;
+  }
+  openModal("prodModal");
+}
+
+// ===== Helpers del uploader de imagen =====
+const CAT_EMOJI = {"Boxes":"📦","Sobres":"🃏","Booster Bundle":"🗂️","Figuras":"🐉","Cartas individuales":"🃏"};
+
+function resetImageUploader(){
+  document.getElementById("prodImageFile").value = "";
+  document.getElementById("prodImageUrl").value = "";
+  document.getElementById("prodImageDeleted").value = "0";
+  document.getElementById("uploadStatus").className = "upload-status";
+  document.getElementById("uploadStatus").textContent = "";
+  const preview = document.getElementById("imgPreview");
+  preview.classList.remove("has-img");
+  const cat = document.getElementById("prodCat").value;
+  document.getElementById("imgPhEmoji").textContent = CAT_EMOJI[cat] || "📦";
+  document.getElementById("imgPhEmoji").style.display = "";
+  // Quitar imagen previa del preview
+  const oldImg = preview.querySelector("img");
+  if(oldImg) oldImg.remove();
+  const oldRemove = preview.querySelector(".img-remove");
+  if(oldRemove) oldRemove.remove();
+  // Mostrar hint offline si aplica
+  document.getElementById("imgOfflineHint").style.display = KikiDB.isOnline() ? "none" : "block";
+}
+
+function showImagePreview(url){
+  const preview = document.getElementById("imgPreview");
+  preview.classList.add("has-img");
+  document.getElementById("imgPhEmoji").style.display = "none";
+  let img = preview.querySelector("img");
+  if(!img){
+    img = document.createElement("img");
+    preview.appendChild(img);
+  }
+  img.src = url;
+  // Botón de eliminar
+  if(!preview.querySelector(".img-remove")){
+    const btn = document.createElement("button");
+    btn.className = "img-remove";
+    btn.textContent = "×";
+    btn.title = "Quitar imagen";
+    btn.onclick = (e) => { e.stopPropagation(); clearImageField(); };
+    preview.appendChild(btn);
+  }
+}
+
+function clearImageField(){
+  document.getElementById("prodImageFile").value = "";
+  document.getElementById("prodImageUrl").value = "";
+  document.getElementById("prodImageDeleted").value = "1";
+  const preview = document.getElementById("imgPreview");
+  preview.classList.remove("has-img");
+  document.getElementById("imgPhEmoji").style.display = "";
+  const oldImg = preview.querySelector("img");
+  if(oldImg) oldImg.remove();
+  const oldRemove = preview.querySelector(".img-remove");
+  if(oldRemove) oldRemove.remove();
+  showToast("Imagen quitada — guarda el producto para confirmar");
+}
+
+// Cuando cambia el select de categoría, actualizar el emoji del preview (si no hay imagen)
+document.addEventListener("change", function(e){
+  if(e.target && e.target.id === "prodCat"){
+    if(!document.getElementById("imgPreview").classList.contains("has-img")){
+      document.getElementById("imgPhEmoji").textContent = CAT_EMOJI[e.target.value] || "📦";
+    }
+  }
+});
+
+// Manejar selección de archivo
+document.addEventListener("change", function(e){
+  if(e.target && e.target.id === "prodImageFile"){
+    const file = e.target.files[0];
+    if(file) handleImageFile(file);
+  }
+});
+
+// Drag & drop
+document.addEventListener("DOMContentLoaded", function(){
+  const dz = document.getElementById("imgDropzone");
+  if(!dz) return;
+  ["dragenter","dragover"].forEach(ev=>{
+    dz.addEventListener(ev, e=>{ e.preventDefault(); dz.classList.add("dragover"); });
+  });
+  ["dragleave","drop"].forEach(ev=>{
+    dz.addEventListener(ev, e=>{ e.preventDefault(); dz.classList.remove("dragover"); });
+  });
+  dz.addEventListener("drop", e=>{
+    const file = e.dataTransfer.files[0];
+    if(file) handleImageFile(file);
+  });
+});
+
+function handleImageFile(file){
+  // Validar tipo
+  const allowedTypes = ["image/jpeg","image/png","image/webp","image/gif"];
+  if(!allowedTypes.includes(file.type)){
+    showUploadStatus("Tipo no permitido. Usa JPG, PNG, WebP o GIF.", "error");
+    return;
+  }
+  if(file.size > 5 * 1024 * 1024){
+    showUploadStatus("La imagen pesa más de 5 MB.", "error");
+    return;
+  }
+  // Vista previa local inmediata (File URL)
+  const localUrl = URL.createObjectURL(file);
+  showImagePreview(localUrl);
+  // Guardar referencia al archivo para subirlo al guardar
+  document.getElementById("prodImageFile").dataset.pendingFile = "1";
+  document.getElementById("prodImageFile").dataset.fileName = file.name;
+  document.getElementById("prodImageFile").dataset.fileSize = file.size;
+  // Guardar el File en una variable global temporal
+  window._pendingImageFile = file;
+  document.getElementById("prodImageDeleted").value = "0";
+  showUploadStatus("Imagen lista para subir al guardar (" + (file.size/1024).toFixed(0) + " KB)", "ok");
+}
+
+function showUploadStatus(msg, type){
+  const el = document.getElementById("uploadStatus");
+  el.textContent = msg;
+  el.className = "upload-status show " + type;
+}
+
+async function saveProduct(){
+  const id = document.getElementById("prodId").value;
+  const name = document.getElementById("prodName").value.trim();
+  const cat = document.getElementById("prodCat").value;
+  const badge = document.getElementById("prodBadge").value || null;
+  const price = parseFloat(document.getElementById("prodPrice").value);
+  const saleRaw = document.getElementById("prodSale").value.trim();
+  const sale = saleRaw === "" ? null : parseFloat(saleRaw);
+  const stockQuantity = parseInt(document.getElementById("prodStockQty").value) || 0;
+  const stock = stockQuantity > 0;
+  const imageDeleted = document.getElementById("prodImageDeleted").value === "1";
+  const pendingFile = window._pendingImageFile;
+  if(!name){ showToast("Falta el nombre", true); return; }
+  if(isNaN(price) || price < 0){ showToast("Precio inválido", true); return; }
+  if(sale !== null && (isNaN(sale) || sale < 0)){ showToast("Precio de oferta inválido", true); return; }
+  if(sale !== null && sale >= price){ showToast("La oferta debe ser menor al precio", true); return; }
+
+  const btn = document.getElementById("saveProdBtn");
+  btn.disabled = true; btn.textContent = "Guardando…";
+  try {
+    let imageUrl = document.getElementById("prodImageUrl").value;
+    let oldImageUrl = null;
+
+    // Si estamos editando, obtener la URL previa (para borrar la imagen vieja si se reemplaza)
+    if(id){
+      const existing = _products.find(x=>x.id===parseInt(id));
+      if(existing) oldImageUrl = existing.image_url;
+    }
+
+    // Caso 1: se marcó "eliminar imagen"
+    if(imageDeleted){
+      imageUrl = null;
+      // Borrar la imagen vieja del bucket si estamos online
+      if(KikiDB.isOnline() && oldImageUrl){
+        const oldPath = extractStoragePathFromUrl(oldImageUrl);
+        if(oldPath) { try { await KikiDB.deleteProductImage(oldPath); } catch(e){ console.warn("No se pudo borrar imagen vieja:", e); } }
+      }
+    }
+    // Caso 2: hay archivo nuevo pendiente → subirlo
+    else if(pendingFile){
+      if(!KikiDB.isOnline()){
+        showToast("No se puede subir imagen en modo offline. Guarda sin imagen.", true);
+        btn.disabled = false; btn.textContent = "Guardar";
+        return;
+      }
+      showUploadStatus("Subiendo imagen a Supabase…", "uploading");
+      // Generar path único: <id o "tmp">-<timestamp>.<ext>
+      const ext = (pendingFile.name.split(".").pop() || "jpg").toLowerCase();
+      const path = `${id || "new"}-${Date.now()}.${ext}`;
+      imageUrl = await KikiDB.uploadProductImage(path, pendingFile);
+      showUploadStatus("Imagen subida ✓", "ok");
+      // Borrar imagen vieja del bucket si la estaba reemplazando
+      if(oldImageUrl){
+        const oldPath = extractStoragePathFromUrl(oldImageUrl);
+        if(oldPath && oldPath !== path){ try { await KikiDB.deleteProductImage(oldPath); } catch(e){ console.warn(e); } }
+      }
+    }
+    // Caso 3: sin cambios en la imagen → mantener la URL existente (imageUrl ya tiene el valor)
+
+    const payload = {name, cat, description: document.getElementById("prodDesc").value.trim(), badge, price, sale, stock, stock_quantity: stockQuantity, image_url: imageUrl};
+    if(id){
+      const updated = await KikiDB.updateProduct(parseInt(id), payload);
+      const i = _products.findIndex(x=>x.id===parseInt(id));
+      if(i>=0) _products[i] = updated;
+    } else {
+      // En el caso de creación con imagen nueva, el path usó "new-<ts>".
+      // Si quisiéramos renombrarlo al id real, requeriría otro paso. Por simplicidad
+      // dejamos el path actual; es único y funciona igual.
+      const np = await KikiDB.createProduct(payload);
+      _products.push(np);
+    }
+    window._pendingImageFile = null;
+    closeModal("prodModal");
+    renderProducts();
+    renderDashboard();
+    showToast("Producto guardado ✓");
+  } catch(err) {
+    showUploadStatus("Error: " + (err.message||""), "error");
+    showToast("Error: " + (err.message||"no se pudo guardar"), true);
+  } finally {
+    btn.disabled = false; btn.textContent = "Guardar";
+  }
+}
+
+// Helper: extraer el path dentro del bucket a partir de la URL pública
+function extractStoragePathFromUrl(publicUrl){
+  if(!publicUrl) return null;
+  const marker = "/storage/v1/object/public/product-images/";
+  const idx = publicUrl.indexOf(marker);
+  if(idx === -1) return null;
+  return decodeURIComponent(publicUrl.substring(idx + marker.length));
+}
+
+async function deleteProduct(id){
+  const p = _products.find(x=>x.id===id);
+  if(!p) return;
+  if(!confirm("¿Eliminar \""+p.name+"\"?\nEsta acción no se puede deshacer.")) return;
+  try {
+    await KikiDB.deleteProduct(id);
+    _products = _products.filter(x=>x.id!==id);
+    renderProducts();
+    renderDashboard();
+    showToast("Producto eliminado");
+  } catch(err) {
+    showToast("Error: " + (err.message||"no se pudo eliminar"), true);
+  }
+}
+
+// ===== Campañas =====
+function campStatus(c){
+  if(c.paused) return "paused";
+  const now = Date.now();
+  const start = new Date(c.start).getTime();
+  const end = new Date(c.end).getTime();
+  if(now < start) return "scheduled";
+  if(now > end) return "ended";
+  return "active";
+}
+
+function fmtDate(d){
+  if(!d) return "—";
+  const dt = new Date(d);
+  return dt.toLocaleDateString("es-MX",{day:"2-digit",month:"short",year:"numeric"}) + " " +
+         dt.toLocaleTimeString("es-MX",{hour:"2-digit",minute:"2-digit"});
+}
+
+function renderCampaigns(){
+  const list = document.getElementById("campaignsList");
+  if(_campaigns.length === 0){
+    list.innerHTML = `<div class="empty-state"><div class="big">🎯</div><h3 style="color:var(--gold);margin-bottom:6px">No hay campañas aún</h3><p>Crea campañas para aplicar descuentos automáticos por fechas.</p>
+      <div style="margin-top:18px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <button class="btn gold" onclick="quickCampaign('buenfin')">🟠 Buen Fin</button>
+        <button class="btn gold" onclick="quickCampaign('blackfriday')">⚫ Black Friday</button>
+        <button class="btn gold" onclick="quickCampaign('navidad')">🎄 Navidad</button>
+      </div></div>`;
+    return;
+  }
+  list.innerHTML = _campaigns.map(c=>{
+    const status = campStatus(c);
+    const lbl = CAMP_LABELS[c.type] || CAMP_LABELS.personalizada;
+    const scopeText = c.scope === "all" ? "Aplica a todos los productos"
+      : c.scope === "category" ? "Aplica a la categoría: " + (c.category||"—")
+      : "Aplica a " + (c.ids||[]).length + " producto(s) específico(s)";
+    return `<div class="campaign-card ${status==='active'?'active-camp':''}">
+      <div class="row1">
+        <h4><span style="font-size:1.3rem">${lbl.emoji}</span> ${escapeHtml(c.name)}
+          <span class="type-tag">${lbl.label}</span>
+          <span class="status ${status}">${status==='active'?'Activa ahora':status==='scheduled'?'Programada':status==='paused'?'Pausada':'Finalizada'}</span>
+        </h4>
+        <div style="font-size:1.4rem;color:var(--gold);font-weight:700">-${c.discount}%</div>
+      </div>
+      <div class="meta">
+        <div><b>Inicio</b>${fmtDate(c.start)}</div>
+        <div><b>Fin</b>${fmtDate(c.end)}</div>
+        <div><b>Banner</b>${c.banner?'Sí':'No'}</div>
+      </div>
+      <div class="scope-text">🎯 ${scopeText}</div>
+      <div class="actions-row">
+        <button class="btn small" onclick="editCampaign(${c.id})">✎ Editar</button>
+        <button class="btn small" onclick="togglePause(${c.id})">${c.paused?'▶ Reanudar':'⏸ Pausar'}</button>
+        <button class="btn small ghost" onclick="duplicateCampaign(${c.id})">⧉ Duplicar</button>
+        <button class="btn small danger" onclick="deleteCampaign(${c.id})">🗑 Eliminar</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function openCampaignModal(){
+  document.getElementById("campModalTitle").textContent = "Nueva campaña";
+  document.getElementById("campId").value = "";
+  document.getElementById("campName").value = "";
+  document.getElementById("campType").value = "personalizada";
+  const now = new Date(); now.setMinutes(0,0,0);
+  const end = new Date(now.getTime() + 7*24*3600*1000);
+  document.getElementById("campStart").value = toLocalInput(now);
+  document.getElementById("campEnd").value = toLocalInput(end);
+  document.getElementById("campDiscount").value = "15";
+  document.getElementById("campScope").value = "all";
+  toggleScope("all");
+  document.getElementById("campBanner").checked = true;
+  openModal("campModal");
+}
+
+function toLocalInput(d){
+  const pad = n => String(n).padStart(2,"0");
+  return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())+"T"+pad(d.getHours())+":"+pad(d.getMinutes());
+}
+
+function toggleScope(v){
+  document.getElementById("scopeCategoryField").style.display = (v==="category")?"block":"none";
+  document.getElementById("scopeSelectedField").style.display = (v==="selected")?"block":"none";
+  if(v==="selected") renderCampProductsList();
+}
+
+function renderCampProductsList(selectedIds){
+  selectedIds = selectedIds || [];
+  const box = document.getElementById("campProductsList");
+  box.innerHTML = _products.map(p=>`
+    <label style="display:flex;gap:8px;align-items:flex-start;padding:5px 4px;border-bottom:1px solid var(--border);font-size:0.82rem;cursor:pointer">
+      <input type="checkbox" value="${p.id}" ${selectedIds.includes(p.id)?'checked':''} style="margin-top:2px">
+      <span style="flex:1"><b>#${p.id}</b> ${escapeHtml(p.name)} <span style="color:var(--text-dim);font-size:0.72rem">[${p.cat}]</span></span>
+    </label>
+  `).join("") || '<p style="color:var(--text-dim);font-size:0.82rem">No hay productos.</p>';
+}
+
+function editCampaign(id){
+  const c = _campaigns.find(x=>x.id===id);
+  if(!c) return;
+  document.getElementById("campModalTitle").textContent = "Editar campaña #"+id;
+  document.getElementById("campId").value = c.id;
+  document.getElementById("campName").value = c.name;
+  document.getElementById("campType").value = c.type;
+  // Convertir ISO → datetime-local input (recortar segundos/zona)
+  document.getElementById("campStart").value = toLocalInput(new Date(c.start));
+  document.getElementById("campEnd").value = toLocalInput(new Date(c.end));
+  document.getElementById("campDiscount").value = c.discount;
+  document.getElementById("campScope").value = c.scope;
+  document.getElementById("campCategory").value = c.category || "Boxes";
+  document.getElementById("campBanner").checked = !!c.banner;
+  toggleScope(c.scope);
+  if(c.scope === "selected") renderCampProductsList(c.ids||[]);
+}
+
+async function saveCampaign(){
+  const id = document.getElementById("campId").value;
+  const name = document.getElementById("campName").value.trim();
+  const type = document.getElementById("campType").value;
+  const startVal = document.getElementById("campStart").value;
+  const endVal = document.getElementById("campEnd").value;
+  const discount = parseInt(document.getElementById("campDiscount").value);
+  const scope = document.getElementById("campScope").value;
+  const category = document.getElementById("campCategory").value;
+  const banner = document.getElementById("campBanner").checked;
+  let ids = [];
+  if(scope === "selected"){
+    ids = [...document.querySelectorAll('#campProductsList input:checked')].map(c=>parseInt(c.value));
+    if(ids.length === 0){ showToast("Selecciona al menos un producto", true); return; }
+  }
+  if(!name){ showToast("Falta el nombre", true); return; }
+  if(!startVal || !endVal){ showToast("Faltan las fechas", true); return; }
+  // Convertir a ISO (Supabase espera timestamptz)
+  const startISO = new Date(startVal).toISOString();
+  const endISO = new Date(endVal).toISOString();
+  if(new Date(endISO) <= new Date(startISO)){ showToast("La fecha de fin debe ser posterior al inicio", true); return; }
+  if(isNaN(discount) || discount < 1 || discount > 99){ showToast("Descuento inválido (1-99)", true); return; }
+
+  const btn = document.getElementById("saveCampBtn");
+  btn.disabled = true; btn.textContent = "Guardando…";
+  try {
+    const payload = {name, type, start: startISO, end: endISO, discount, scope, category, ids, banner};
+    if(id){
+      const updated = await KikiDB.updateCampaign(parseInt(id), payload);
+      const i = _campaigns.findIndex(x=>x.id===parseInt(id));
+      if(i>=0) _campaigns[i] = updated;
+    } else {
+      const nc = await KikiDB.createCampaign(payload);
+      _campaigns.push(nc);
+    }
+    closeModal("campModal");
+    renderCampaigns();
+    renderDashboard();
+    showToast("Campaña guardada ✓");
+  } catch(err) {
+    showToast("Error: " + (err.message||"no se pudo guardar"), true);
+  } finally {
+    btn.disabled = false; btn.textContent = "Guardar campaña";
+  }
+}
+
+async function togglePause(id){
+  const c = _campaigns.find(x=>x.id===id);
+  if(!c) return;
+  try {
+    const updated = await KikiDB.updateCampaign(id, {...c, paused: !c.paused});
+    const i = _campaigns.findIndex(x=>x.id===id);
+    if(i>=0) _campaigns[i] = updated;
+    renderCampaigns();
+    renderDashboard();
+    showToast(updated.paused ? "Campaña pausada" : "Campaña reanudada ✓");
+  } catch(err) {
+    showToast("Error: " + (err.message||"no se pudo actualizar"), true);
+  }
+}
+
+async function duplicateCampaign(id){
+  const c = _campaigns.find(x=>x.id===id);
+  if(!c) return;
+  try {
+    const copy = await KikiDB.createCampaign({
+      name: c.name + " (copia)", type: c.type, start: c.start, end: c.end,
+      discount: c.discount, scope: c.scope, category: c.category, ids: c.ids||[],
+      banner: c.banner
+    });
+    _campaigns.push(copy);
+    renderCampaigns();
+    renderDashboard();
+    showToast("Campaña duplicada ✓");
+  } catch(err) {
+    showToast("Error: " + (err.message||"no se pudo duplicar"), true);
+  }
+}
+
+async function deleteCampaign(id){
+  if(!confirm("¿Eliminar esta campaña?")) return;
+  try {
+    await KikiDB.deleteCampaign(id);
+    _campaigns = _campaigns.filter(x=>x.id!==id);
+    renderCampaigns();
+    renderDashboard();
+    showToast("Campaña eliminada");
+  } catch(err) {
+    showToast("Error: " + (err.message||"no se pudo eliminar"), true);
+  }
+}
+
+// ===== Quick campaigns =====
+function quickCampaign(type){
+  const today = new Date();
+  const y = today.getFullYear();
+  let name, start, end, discount;
+  if(type === "buenfin"){
+    name = "Buen Fin " + y;
+    start = `${y}-11-13T00:00`;
+    end   = `${y}-11-17T23:59`;
+    discount = 15;
+  } else if(type === "blackfriday"){
+    name = "Black Friday " + y;
+    start = `${y}-11-27T00:00`;
+    end   = `${y}-11-30T23:59`;
+    discount = 20;
+  } else if(type === "navidad"){
+    name = "Ventas de Navidad " + y;
+    start = `${y}-12-01T00:00`;
+    end   = `${y}-12-25T23:59`;
+    discount = 12;
+  }
+  if(new Date(end) < today){
+    const ny = y + 1;
+    start = start.replace(`${y}-`, `${ny}-`);
+    end = end.replace(`${y}-`, `${ny}-`);
+    name = name.replace(String(y), String(ny));
+  }
+  openCampaignModal();
+  document.getElementById("campName").value = name;
+  document.getElementById("campType").value = type;
+  document.getElementById("campStart").value = start;
+  document.getElementById("campEnd").value = end;
+  document.getElementById("campDiscount").value = discount;
+  showToast("Datos pre-llenados — revisa y guarda");
+}
+
+// ===== Export / Import =====
+async function exportData(){
+  try {
+    const data = await KikiDB.exportAll();
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "kiki_data_" + new Date().toISOString().slice(0,10) + ".json";
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast("Datos exportados ✓");
+  } catch(err){
+    showToast("Error: " + (err.message||"no se pudo exportar"), true);
+  }
+}
+
+async function importData(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = async ev => {
+    try{
+      const data = JSON.parse(ev.target.result);
+      if(!data.products || !Array.isArray(data.products)) throw new Error("Formato inválido");
+      if(!confirm("Esto REEMPLAZARÁ todos los productos y campañas actuales. ¿Continuar?")) return;
+      await KikiDB.importAll(data);
+      await refreshAll();
+      showToast("Datos importados ✓");
+    }catch(err){
+      showToast("Error: " + err.message, true);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = "";
+}
+
+async function resetData(){
+  if(KikiDB.isOnline()){
+    alert("En modo Supabase, para restablecer el catálogo:\n\n1. Ve a Supabase Dashboard → SQL Editor\n2. Pega el contenido de schema.sql\n3. Ejecuta la consulta\n\nEsto recreará las tablas y cargará los 70 productos iniciales.");
+    return;
+  }
+  if(!confirm("¿Restablecer al catálogo inicial (70 productos)? Se borrarán tus cambios y campañas.")) return;
+  try {
+    await KikiDB.resetToSeed();
+    await refreshAll();
+    showToast("Catálogo restablecido ✓");
+  } catch(err){
+    showToast("Error: " + err.message, true);
+  }
+}
+
+// ============================================================
+// ===== PEDIDOS =====
+// ============================================================
+let _orders = [];
+
+async function loadOrders(){
+  const list = document.getElementById('ordersList');
+  if(!window.KikiDB || !window.KikiDB.isOnline()){
+    list.innerHTML = '<p class="empty-state">Se requiere conexión a Supabase para ver pedidos.</p>';
+    return;
+  }
+  list.innerHTML = '<p class="empty-state">Cargando pedidos…</p>';
+  try {
+    _orders = await KikiDB.listAllOrders();
+    renderOrders();
+  } catch(err){
+    list.innerHTML = '<p class="empty-state">Error al cargar pedidos: ' + (err.message || err) + '</p>';
+  }
+}
+
+function renderOrders(){
+  const list = document.getElementById('ordersList');
+  if(!_orders || _orders.length === 0){
+    list.innerHTML = '<p class="empty-state">Aún no hay pedidos registrados.<br>Cuando un cliente finalice una compra en la tienda, aparecerá aquí.</p>';
+    return;
+  }
+  const statusOptions = ['pendiente','confirmado','pagado','enviado','entregado','cancelado'];
+  list.innerHTML = _orders.map(o => {
+    const date = new Date(o.created_at).toLocaleString('es-MX', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    const statusLabel = o.status.charAt(0).toUpperCase() + o.status.slice(1);
+    return `<div class="order-row">
+      <div class="ord-id">#${o.id}</div>
+      <div class="ord-customer">
+        <div class="nm">${escapeHtml(o.customer_name || 'Invitado')}</div>
+        <div class="ph">${escapeHtml(o.customer_phone || '')}${o.customer_email ? ' · ' + escapeHtml(o.customer_email) : ''}${o.customer_address_city ? ' · ' + escapeHtml(o.customer_address_city) : ''}</div>
+      </div>
+      <div>
+        <span class="ord-status-badge ${o.status}">${statusLabel}</span>
+        <select onchange="changeOrderStatus(${o.id}, this.value)" style="margin-top:4px;width:100%;font-size:.78rem;padding:4px" aria-label="Cambiar estado">
+          ${statusOptions.map(s => `<option value="${s}" ${s===o.status?'selected':''}>${s.charAt(0).toUpperCase()+s.slice(1)}</option>`).join('')}
+        </select>
+      </div>
+      <div>
+        <div class="ord-total">${fmtMoney(o.total)}</div>
+        <div class="ord-date">${date}</div>
+      </div>
+      <div class="ord-actions">
+        <button onclick="viewOrderDetail(${o.id})">👁 Detalle</button>
+        ${o.customer_phone ? `<button onclick="contactCustomer(${o.id})">💬 WhatsApp</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function changeOrderStatus(id, newStatus){
+  try {
+    await KikiDB.updateOrderStatus(id, newStatus);
+    showToast('✓ Pedido #' + id + ' → ' + newStatus);
+    // Actualizar el objeto local
+    const o = _orders.find(x => x.id === id);
+    if(o){ o.status = newStatus; renderOrders(); }
+  } catch(err){
+    alert('No se pudo actualizar el estado: ' + (err.message || err));
+  }
+}
+
+async function viewOrderDetail(id){
+  try {
+    const detail = await KikiDB.getOrderDetail(id);
+    const items = (detail.order_items || []).map(it =>
+      `• ${it.name} ×${it.qty} — ${fmtMoney(it.line_total)}`
+    ).join('\n');
+    const addr = [detail.customer_address_street, detail.customer_address_city, detail.customer_address_state, detail.customer_address_zip]
+      .filter(Boolean).join(', ');
+    alert(
+      `PEDIDO #${detail.id}\n` +
+      `Estado: ${detail.status}\n` +
+      `Método de pago: ${detail.payment_method}\n\n` +
+      `CLIENTE\n${detail.customer_name}\n${detail.customer_phone || ''}\n${detail.customer_email || ''}\n${addr || '(sin dirección)'}\n\n` +
+      `ARTÍCULOS\n${items || '(sin items)'}\n\n` +
+      `Subtotal: ${fmtMoney(detail.subtotal)}\nEnvío: ${fmtMoney(detail.shipping)}\nTOTAL: ${fmtMoney(detail.total)}` +
+      (detail.notes ? `\n\nNotas: ${detail.notes}` : '')
+    );
+  } catch(err){
+    alert('No se pudo cargar el detalle: ' + (err.message || err));
+  }
+}
+
+function contactCustomer(id){
+  const o = _orders.find(x => x.id === id);
+  if(!o || !o.customer_phone) return;
+  // Limpia el teléfono: solo dígitos, asume código de país 52 si no lo trae
+  let phone = (o.customer_phone || '').replace(/\D/g, '');
+  if(phone.length === 10) phone = '52' + phone;
+  const msg = `Hola ${o.customer_name}, soy de Kiki's Collection Shop. Sobre tu pedido #${o.id}…`;
+  window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg), '_blank');
+}
+
+// ============================================================
+// ===== CUENTAS BANCARIAS =====
+// ============================================================
+let _bankAccounts = [];
+
+async function loadBankAccounts(){
+  const list = document.getElementById('bankAccountsList');
+  if(!window.KikiDB || !window.KikiDB.isOnline()){
+    list.innerHTML = '<p class="empty-state">Se requiere conexión a Supabase para gestionar cuentas bancarias.</p>';
+    return;
+  }
+  list.innerHTML = '<p class="empty-state">Cargando cuentas…</p>';
+  try {
+    _bankAccounts = await KikiDB.listAllBankAccounts();
+    renderBankAccounts();
+  } catch(err){
+    list.innerHTML = '<p class="empty-state">Error al cargar cuentas: ' + (err.message || err) + '</p>';
+  }
+}
+
+function renderBankAccounts(){
+  const list = document.getElementById('bankAccountsList');
+  if(!_bankAccounts || _bankAccounts.length === 0){
+    list.innerHTML = '<p class="empty-state">No hay cuentas bancarias registradas.<br>Crea una con el botón "Nueva cuenta".</p>';
+    return;
+  }
+  list.innerHTML = _bankAccounts.map(a => {
+    return `<div class="bank-card ${a.is_active ? '' : 'inactive'}">
+      <div class="bank-actions">
+        <button onclick="editBankAccount(${a.id})">✏️</button>
+        <button onclick="deleteBankAccount(${a.id})">🗑️</button>
+      </div>
+      <div class="bank-name">${escapeHtml(a.bank_name)}</div>
+      <div class="bank-holder">Titular: ${escapeHtml(a.holder)}</div>
+      <div class="bank-clabe">CLABE: ${escapeHtml(a.clabe)}</div>
+      ${a.card_number_last4 ? `<div class="bank-meta">Tarjeta: •••• ${escapeHtml(a.card_number_last4)}</div>` : ''}
+      <div class="bank-meta">Tipo: ${escapeHtml(a.account_type)} · Orden: ${a.sort_order}</div>
+      <span class="bank-flag ${a.is_active ? 'on' : 'off'}">${a.is_active ? 'Activa' : 'Inactiva'}</span>
+    </div>`;
+  }).join('');
+}
+
+function openBankAccountModal(){
+  document.getElementById('bankId').value = '';
+  document.getElementById('bankModalTitle').textContent = 'Nueva cuenta bancaria';
+  document.getElementById('bankName').value = '';
+  document.getElementById('bankHolder').value = '';
+  document.getElementById('bankClabe').value = '';
+  document.getElementById('bankCardLast4').value = '';
+  document.getElementById('bankType').value = 'transferencia';
+  document.getElementById('bankSort').value = '1';
+  document.getElementById('bankActive').value = 'true';
+  openModal('bankModal');
+}
+
+function editBankAccount(id){
+  const a = _bankAccounts.find(x => x.id === id);
+  if(!a) return;
+  document.getElementById('bankId').value = a.id;
+  document.getElementById('bankModalTitle').textContent = 'Editar cuenta bancaria';
+  document.getElementById('bankName').value = a.bank_name || '';
+  document.getElementById('bankHolder').value = a.holder || '';
+  document.getElementById('bankClabe').value = a.clabe || '';
+  document.getElementById('bankCardLast4').value = a.card_number_last4 || '';
+  document.getElementById('bankType').value = a.account_type || 'transferencia';
+  document.getElementById('bankSort').value = a.sort_order || 0;
+  document.getElementById('bankActive').value = a.is_active ? 'true' : 'false';
+  openModal('bankModal');
+}
+
+async function saveBankAccount(){
+  const clabe = document.getElementById('bankClabe').value.trim();
+  if(clabe.length !== 18 || !/^\d+$/.test(clabe)){
+    alert('La CLABE debe tener exactamente 18 dígitos numéricos.');
+    return;
+  }
+  const acc = {
+    id: document.getElementById('bankId').value ? Number(document.getElementById('bankId').value) : null,
+    bank_name: document.getElementById('bankName').value.trim(),
+    holder: document.getElementById('bankHolder').value.trim(),
+    clabe: clabe,
+    card_number_last4: document.getElementById('bankCardLast4').value.trim() || null,
+    account_type: document.getElementById('bankType').value,
+    sort_order: Number(document.getElementById('bankSort').value) || 0,
+    is_active: document.getElementById('bankActive').value === 'true'
+  };
+  if(!acc.bank_name || !acc.holder){
+    alert('Banco y titular son obligatorios.');
+    return;
+  }
+  try {
+    await KikiDB.upsertBankAccount(acc);
+    closeModal('bankModal');
+    showToast('✓ Cuenta guardada');
+    await loadBankAccounts();
+  } catch(err){
+    alert('No se pudo guardar la cuenta: ' + (err.message || err));
+  }
+}
+
+async function deleteBankAccount(id){
+  if(!confirm('¿Eliminar esta cuenta bancaria? Esta acción no se puede deshacer.')) return;
+  try {
+    await KikiDB.deleteBankAccount(id);
+    showToast('✓ Cuenta eliminada');
+    await loadBankAccounts();
+  } catch(err){
+    alert('No se pudo eliminar: ' + (err.message || err));
+  }
+}
+
+// ===== UI helpers =====
+function switchSection(name){
+  document.querySelectorAll(".tabs button").forEach(b=>b.classList.toggle("active", b.dataset.tab===name));
+  document.querySelectorAll(".section").forEach(s=>s.classList.toggle("active", s.id===name));
+  // Carga perezosa: al abrir una pestaña por primera vez, trae sus datos.
+  if(name === 'orders' && typeof loadOrders === 'function'){
+    loadOrders();
+  } else if(name === 'bankaccounts' && typeof loadBankAccounts === 'function'){
+    loadBankAccounts();
+  } else if(name === 'hero' && typeof renderHeroAdmin === 'function'){
+    renderHeroAdmin();
+  }
+}
+
+function openModal(id){ document.getElementById(id).classList.add("open"); }
+function closeModal(id){ document.getElementById(id).classList.remove("open"); }
+
+function showToast(msg, isError){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = "toast show" + (isError ? " error" : "");
+  clearTimeout(window._toastT);
+  window._toastT = setTimeout(()=>t.className="toast"+(isError?" error":""), 2600);
+}
+
+function escapeHtml(s){ return String(s||"").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function escapeAttr(s){ return String(s||"").replace(/"/g,"&quot;"); }
+function fmtMoney(n){ return "$" + Number(n||0).toLocaleString("es-MX",{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") document.querySelectorAll(".modal-overlay.open").forEach(m=>m.classList.remove("open")); });
+
+// ===== Init =====
+window.addEventListener('kiki-db-ready', () => checkAuthAndShowApp());
+// Si el evento ya disparó (script cargado antes que este listener), llamar directo:
+if(window.KikiDB) checkAuthAndShowApp();
+
+// ===== Editor del Hero / Banner (slides editables) =====
+// Persistencia en localStorage (clave compartida con la tienda: kiki_hero_slides).
+const HERO_DEFAULTS = [
+  { id: 1, eyebrow: "Pokémon TCG · Tapachula, Chiapas", title: "Tu tienda de <em>Pokémon TCG</em> en el sur de México", text: "Boxes, sobres, booster bundles y figuras 100% originales. Envíos a todo México con FedEx, DHL y Estafeta.", cta: "Ver catálogo →", ctaLink: "#catalogo", bg: "" },
+  { id: 2, eyebrow: "Mega Evolution", title: "Llegaron las nuevas expansiones <em>Black Bolt</em> y <em>White Flare</em>", text: "ETBs, Booster Bundles y Binder Collections disponibles. Stock limitado.", cta: "Comprar ahora →", ctaLink: "#catalogo", bg: "b2" },
+  { id: 3, eyebrow: "Tarjeta Digital Kikis", title: "¿Quieres un <em>pedido especial</em>?", text: "Escríbenos por WhatsApp y te ayudamos a encontrar lo que buscas. Singles y pedidos personalizados.", cta: "Hablar por WhatsApp →", ctaLink: "https://wa.me/529626141770", bg: "b3" }
+];
+
+function heroLoad(){
+  try{
+    const raw = localStorage.getItem("kiki_hero_slides");
+    if(!raw) return JSON.parse(JSON.stringify(HERO_DEFAULTS));
+    const arr = JSON.parse(raw);
+    return (Array.isArray(arr) && arr.length > 0) ? arr : JSON.parse(JSON.stringify(HERO_DEFAULTS));
+  }catch(e){ return JSON.parse(JSON.stringify(HERO_DEFAULTS)); }
+}
+
+function heroSave(slides){
+  localStorage.setItem("kiki_hero_slides", JSON.stringify(slides));
+  // Disparar evento storage manualmente para que la tienda abierta en otra pestaña se actualice
+  try{
+    localStorage.setItem("kiki_hero_slides", JSON.stringify(slides));
+  }catch(e){}
+}
+
+function heroNextId(slides){
+  return slides.reduce((m, s) => Math.max(m, s.id || 0), 0) + 1;
+}
+
+function renderHeroAdmin(){
+  const container = document.getElementById("heroSlidesContainer");
+  if(!container) return;
+  const slides = heroLoad();
+  if(slides.length === 0){
+    container.innerHTML = '<div class="info-banner"><span>⚠️</span><span>No hay slides. Agrega uno nuevo para mostrar el banner.</span></div>';
+    return;
+  }
+  container.innerHTML = slides.map((s, idx) => {
+    return `<div class="campaign-card" data-heroidx="${idx}">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+        <h3 style="margin:0;color:var(--gold);font-size:1rem">Slide ${idx+1}</h3>
+        <div style="display:flex;gap:6px">
+          <button class="btn" onclick="heroMove(${idx},-1)" ${idx===0?'disabled':''}>↑</button>
+          <button class="btn" onclick="heroMove(${idx},1)" ${idx===slides.length-1?'disabled':''}>↓</button>
+          <button class="btn danger" onclick="heroDelete(${idx})">🗑 Eliminar</button>
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:10px">
+        <label>Etiqueta (eyebrow) — texto pequeño arriba</label>
+        <input type="text" value="${escapeAttr(s.eyebrow||'')}" oninput="heroEdit(${idx},'eyebrow',this.value)" placeholder="Ej: Pokémon TCG · Tapachula">
+      </div>
+      <div class="field" style="margin-bottom:10px">
+        <label>Título principal (puedes usar &lt;em&gt;texto&lt;/em&gt; para resaltar en dorado)</label>
+        <textarea rows="2" oninput="heroEdit(${idx},'title',this.value)" placeholder="Ej: Tu tienda de Pokémon TCG">${escapeHtml(s.title||'')}</textarea>
+      </div>
+      <div class="field" style="margin-bottom:10px">
+        <label>Texto descriptivo</label>
+        <textarea rows="2" oninput="heroEdit(${idx},'text',this.value)" placeholder="Descripción del slide">${escapeHtml(s.text||'')}</textarea>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="field" style="margin-bottom:10px">
+          <label>Texto del botón</label>
+          <input type="text" value="${escapeAttr(s.cta||'')}" oninput="heroEdit(${idx},'cta',this.value)" placeholder="Ej: Ver catálogo →">
+        </div>
+        <div class="field" style="margin-bottom:10px">
+          <label>Link del botón</label>
+          <input type="text" value="${escapeAttr(s.ctaLink||'')}" oninput="heroEdit(${idx},'ctaLink',this.value)" placeholder="Ej: #catalogo o https://wa.me/...">
+        </div>
+      </div>
+      <div class="field">
+        <label>Color de fondo</label>
+        <select onchange="heroEdit(${idx},'bg',this.value)">
+          <option value="" ${s.bg===''?'selected':''}>Verde teal (por defecto)</option>
+          <option value="b2" ${s.bg==='b2'?'selected':''}>Naranja oscuro</option>
+          <option value="b3" ${s.bg==='b3'?'selected':''}>Mezcla teal/naranja</option>
+        </select>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function heroEdit(idx, field, value){
+  const slides = heroLoad();
+  if(!slides[idx]) return;
+  slides[idx][field] = value;
+  heroSave(slides);
+  showToast("✓ Guardado");
+}
+
+function heroAddSlide(){
+  const slides = heroLoad();
+  slides.push({ id: heroNextId(slides), eyebrow: "Nuevo slide", title: "Título del nuevo slide", text: "Descripción del slide", cta: "Ver más →", ctaLink: "#catalogo", bg: "" });
+  heroSave(slides);
+  renderHeroAdmin();
+  showToast("✓ Slide agregado");
+}
+
+function heroDelete(idx){
+  if(!confirm("¿Eliminar este slide del banner?")) return;
+  const slides = heroLoad();
+  slides.splice(idx, 1);
+  heroSave(slides);
+  renderHeroAdmin();
+  showToast("✓ Slide eliminado");
+}
+
+function heroMove(idx, dir){
+  const slides = heroLoad();
+  const newIdx = idx + dir;
+  if(newIdx < 0 || newIdx >= slides.length) return;
+  const tmp = slides[idx];
+  slides[idx] = slides[newIdx];
+  slides[newIdx] = tmp;
+  heroSave(slides);
+  renderHeroAdmin();
+}
+
+function heroResetDefault(){
+  if(!confirm("¿Restaurar los 3 slides por defecto? Se perderán los cambios personalizados.")) return;
+  localStorage.removeItem("kiki_hero_slides");
+  renderHeroAdmin();
+  showToast("✓ Slides restaurados");
+}
+</script>
+</body>
+</html>

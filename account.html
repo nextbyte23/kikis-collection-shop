@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mi Cuenta · Kiki's Collection Shop</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎴</text></svg>">
+<style>
+  :root{
+    --teal-deep:#0f3a3a; --teal:#1a5757; --gold:#8d7325; --orange:#c98a2b;
+    --cream:#f5f0e1; --text:#2a2a2a; --text-dim:#6b6b6b; --border:#e5e5e5;
+    --sale:#d94545; --green:#4a8a4a; --panel:#fff; --panel-2:#faf7f0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--panel-2);color:var(--text);line-height:1.5;min-height:100vh}
+  a{color:inherit;text-decoration:none}
+
+  /* Header */
+  .topbar{background:var(--teal-deep);color:var(--cream);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+  .topbar .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1.1rem;color:var(--gold)}
+  .topbar .brand .ico{font-size:1.4rem}
+  .topbar nav{display:flex;align-items:center;gap:18px;font-size:.9rem}
+  .topbar nav a{color:var(--cream);opacity:.85;transition:opacity .15s}
+  .topbar nav a:hover{opacity:1;color:var(--gold)}
+  .topbar .back-btn{background:transparent;border:1px solid var(--gold);color:var(--gold);padding:6px 14px;border-radius:6px;cursor:pointer;font-size:.85rem;font-family:inherit;transition:background .15s}
+  .topbar .back-btn:hover{background:var(--gold);color:#2a1500}
+
+  /* Contenedor */
+  .wrap{max-width:760px;margin:24px auto;padding:0 16px 60px}
+
+  /* Tarjetas */
+  .card{background:var(--panel);border-radius:12px;padding:24px;box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:18px}
+  .card h2{font-size:1.2rem;margin-bottom:6px;color:var(--teal-deep)}
+  .card .sub{color:var(--text-dim);font-size:.88rem;margin-bottom:18px}
+
+  /* Estados */
+  #loading{text-align:center;padding:60px 20px;color:var(--text-dim)}
+  .spinner{display:inline-block;width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* Formularios de auth */
+  .auth-tabs{display:flex;gap:0;margin-bottom:18px;border-bottom:2px solid var(--border)}
+  .auth-tabs button{flex:1;background:transparent;border:0;padding:12px;font-size:.95rem;font-weight:600;color:var(--text-dim);cursor:pointer;border-bottom:3px solid transparent;transition:all .15s;font-family:inherit}
+  .auth-tabs button.active{color:var(--gold);border-bottom-color:var(--gold)}
+  .auth-form{display:flex;flex-direction:column;gap:12px}
+  .auth-form label{font-size:.82rem;font-weight:600;color:var(--text-dim);margin-bottom:2px}
+  .auth-form input{width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:.92rem;transition:border-color .15s,box-shadow .15s}
+  .auth-form input:focus{outline:0;border-color:var(--gold);box-shadow:0 0 0 3px rgba(141,115,37,.12)}
+  .btn{background:var(--gold);color:#2a1500;font-weight:700;border:0;padding:12px;border-radius:8px;cursor:pointer;font-size:.95rem;font-family:inherit;transition:background .15s}
+  .btn:hover{background:var(--orange)}
+  .btn-ghost{background:transparent;color:var(--text-dim);border:1px solid var(--border)}
+  .btn-ghost:hover{background:var(--panel-2);color:var(--text)}
+  .btn-danger{background:var(--sale);color:#fff}
+  .btn-danger:hover{background:#b53737}
+  .hint{font-size:.78rem;color:var(--text-dim);margin-top:6px;line-height:1.4}
+  .hint.ok{color:var(--green)}
+  .hint.err{color:var(--sale)}
+
+  /* Vista logueado */
+  .greeting{text-align:center;margin-bottom:18px}
+  .greeting .avatar{width:64px;height:64px;border-radius:50%;background:var(--gold);color:#2a1500;display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:700;margin:0 auto 10px}
+  .greeting h2{margin-bottom:2px}
+  .greeting .email{color:var(--text-dim);font-size:.88rem}
+
+  /* Secciones plegables */
+  .section{border:1px solid var(--border);border-radius:8px;margin-bottom:12px;overflow:hidden}
+  .section summary{cursor:pointer;padding:14px 16px;font-weight:600;background:var(--panel-2);list-style-position:inside;font-size:.95rem;color:var(--teal-deep)}
+  .section summary:hover{background:#f0ebdc}
+  .section[open] summary{border-bottom:1px solid var(--border)}
+  .section-body{padding:16px}
+
+  /* Pedidos */
+  .order-card{border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;background:var(--panel)}
+  .ord-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .ord-num{font-weight:700;color:var(--teal-deep)}
+  .ord-status{font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:12px;text-transform:uppercase;letter-spacing:.5px}
+  .ord-status.pendiente,.ord-status.pending{background:#fef3c7;color:#92400e}
+  .ord-status.pago,.ord-status.paid{background:#dcfce7;color:#166534}
+  .ord-status.enviado,.ord-status.shipped{background:#dbeafe;color:#1e40af}
+  .ord-status.entregado,.ord-status.delivered{background:#d1fae5;color:#065f46}
+  .ord-status.cancelado,.ord-status.cancelled{background:#fee2e2;color:#991b1b}
+  .ord-items{font-size:.85rem;color:var(--text);line-height:1.6;margin-bottom:8px}
+  .ord-foot{display:flex;justify-content:space-between;font-size:.85rem;border-top:1px dashed var(--border);padding-top:8px}
+  .ord-foot .total{font-weight:700;color:var(--gold)}
+  .ord-foot .date{color:var(--text-dim)}
+  .empty{color:var(--text-dim);text-align:center;padding:24px;font-size:.9rem}
+
+  /* Acciones de cuenta */
+  .actions-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+  .actions-row .btn{flex:1;min-width:140px}
+
+  /* Toast */
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--green);color:#062b14;padding:10px 18px;border-radius:8px;font-weight:600;font-size:.88rem;z-index:200;opacity:0;transition:transform .3s,opacity .3s;box-shadow:0 6px 18px rgba(0,0,0,.4)}
+  .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+  .toast.err{background:var(--sale);color:#fff}
+
+  @media(max-width:640px){
+    .wrap{padding:0 12px 40px}
+    .card{padding:18px}
+    .topbar nav{gap:10px;font-size:.8rem}
+    .topbar .back-btn{padding:5px 10px;font-size:.78rem}
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a href="kikis_collection_store.html" class="brand">
+    <span class="ico">🎴</span>
+    <span>Kiki's Collection Shop</span>
+  </a>
+  <nav>
+    <a href="kikis_collection_store.html">← Volver a la tienda</a>
+  </nav>
+</header>
+
+<div class="wrap">
+
+  <!-- Estado: cargando -->
+  <div id="loading">
+    <div class="spinner"></div>
+    <p style="margin-top:12px">Cargando tu cuenta…</p>
+  </div>
+
+  <!-- Vista: NO logueado (login / registro) -->
+  <div id="authView" class="card" style="display:none">
+    <h2>Mi Cuenta</h2>
+    <p class="sub">Inicia sesión para ver tus pedidos y guardar tus datos de envío. Si no tienes cuenta, créala en 30 segundos.</p>
+
+    <div class="auth-tabs">
+      <button class="active" id="tabLogin" onclick="switchTab('login')">Iniciar sesión</button>
+      <button id="tabSignup" onclick="switchTab('signup')">Crear cuenta</button>
+    </div>
+
+    <!-- Login -->
+    <form id="loginForm" class="auth-form" onsubmit="doLogin(event)">
+      <div>
+        <label>Correo electrónico</label>
+        <input type="email" id="loginEmail" required placeholder="tu@correo.com" autocomplete="email">
+      </div>
+      <div>
+        <label>Contraseña</label>
+        <input type="password" id="loginPassword" required placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn">Entrar</button>
+      <p class="hint" id="loginHint">Accede para acelerar tus compras y ver tu historial.</p>
+    </form>
+
+    <!-- Signup -->
+    <form id="signupForm" class="auth-form" onsubmit="doSignup(event)" style="display:none">
+      <div>
+        <label>Nombre completo</label>
+        <input type="text" id="signupName" required placeholder="Ej: María González" autocomplete="name">
+      </div>
+      <div>
+        <label>Correo electrónico</label>
+        <input type="email" id="signupEmail" required placeholder="tu@correo.com" autocomplete="email">
+      </div>
+      <div>
+        <label>WhatsApp</label>
+        <input type="tel" id="signupPhone" placeholder="52 962 614 1770" autocomplete="tel">
+      </div>
+      <div>
+        <label>Contraseña (mínimo 6 caracteres)</label>
+        <input type="password" id="signupPassword" required minlength="6" placeholder="••••••••" autocomplete="new-password">
+      </div>
+      <button type="submit" class="btn">Crear cuenta</button>
+      <p class="hint" id="signupHint">Al registrarte podrás hacer seguimiento de tus pedidos y acelerar tus próximas compras. Te enviaremos un correo para verificar tu cuenta.</p>
+    </form>
+
+    <!-- Verificación de correo (enlace o código OTP) -->
+    <form id="otpForm" class="auth-form" onsubmit="verifyOtpCode(event)" style="display:none">
+      <div style="text-align:center;margin-bottom:6px">
+        <div style="font-size:2rem">📧</div>
+        <p style="font-weight:600;color:var(--teal-deep);margin:6px 0">Verifica tu correo</p>
+        <p class="hint" style="margin-top:0" id="otpIntroText">Te enviamos un correo a <b id="otpEmailDisplay"></b>. Sigue las instrucciones del correo para activar tu cuenta.</p>
+      </div>
+
+      <!-- Modo A: código OTP de 6 dígitos (requiere SMTP custom con plantilla {{ .Token }}) -->
+      <div id="otpCodeWrap" style="display:none">
+        <div>
+          <label>Código de verificación</label>
+          <input type="text" id="otpCode" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required placeholder="123456" autocomplete="one-time-code" style="text-align:center;font-size:1.4rem;letter-spacing:.4rem;font-weight:700">
+        </div>
+        <button type="submit" class="btn">Verificar código</button>
+        <p class="hint" id="otpHint"></p>
+        <button type="button" class="btn btn-ghost" onclick="resendOtpCode()">Reenviar código</button>
+      </div>
+
+      <!-- Modo B: enlace de confirmación (Supabase default, sin SMTP) -->
+      <div id="otpLinkWrap" style="display:none">
+        <p class="hint" style="background:var(--panel-2);border-radius:8px;padding:12px;line-height:1.5">
+          📬 <b>Revisa tu correo</b> y haz clic en el botón <b>"Confirm email address"</b> dentro del mensaje.
+          Cuando lo hagas, esta página te llevará automáticamente a la tienda.
+        </p>
+        <button type="button" class="btn" onclick="checkIfVerified()">✓ Ya verifiqué mi correo</button>
+        <p class="hint" id="otpHint2"></p>
+        <button type="button" class="btn btn-ghost" onclick="resendOtpCode()">Reenviar correo</button>
+      </div>
+
+      <button type="button" class="btn btn-ghost" onclick="cancelOtp()">Cancelar</button>
+    </form>
+  </div>
+
+  <!-- Vista: LOGUEADO (perfil + pedidos) -->
+  <div id="profileView" class="card" style="display:none">
+    <div class="greeting">
+      <div class="avatar" id="avatar">👤</div>
+      <h2 id="userName">Cliente</h2>
+      <p class="email" id="userEmail"></p>
+    </div>
+
+    <!-- Datos de envío -->
+    <details class="section" open>
+      <summary>📋 Datos de envío</summary>
+      <div class="section-body">
+        <form id="profileForm" class="auth-form" onsubmit="saveProfile(event)">
+          <div>
+            <label>Nombre completo</label>
+            <input type="text" id="pfName" placeholder="Tu nombre">
+          </div>
+          <div>
+            <label>Teléfono / WhatsApp</label>
+            <input type="tel" id="pfPhone" placeholder="52 962 614 1770">
+          </div>
+          <div>
+            <label>Calle y número</label>
+            <input type="text" id="pfStreet" placeholder="Calle #123, Colonia">
+          </div>
+          <div>
+            <label>Ciudad</label>
+            <input type="text" id="pfCity" placeholder="Tapachula">
+          </div>
+          <div>
+            <label>Estado</label>
+            <input type="text" id="pfState" placeholder="Chiapas">
+          </div>
+          <div>
+            <label>Código postal</label>
+            <input type="text" id="pfZip" placeholder="30700">
+          </div>
+          <button type="submit" class="btn">Guardar datos</button>
+        </form>
+      </div>
+    </details>
+
+    <!-- Mis pedidos -->
+    <details class="section" open>
+      <summary>📦 Mis pedidos</summary>
+      <div class="section-body">
+        <div id="ordersList">
+          <p class="empty">Cargando…</p>
+        </div>
+      </div>
+    </details>
+
+    <!-- Acciones -->
+    <div class="actions-row">
+      <a href="kikis_collection_store.html" class="btn" style="text-align:center">🛒 Seguir comprando</a>
+      <button class="btn btn-danger" onclick="doLogout()">Cerrar sesión</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Supabase client + config -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="supabase-client.js"></script>
+
+<script>
+// ===== Estado =====
+let _profile = null;
+let _unsubAuth = null;
+
+// ===== Init =====
+document.addEventListener('DOMContentLoaded', initAccount);
+
+async function initAccount(){
+  // Verificar que Supabase esté configurado
+  if(!window.KikiDB || !window.KikiDB.isOnline()){
+    showView('auth');
+    document.getElementById('loginHint').className = 'hint err';
+    document.getElementById('loginHint').textContent = 'No hay conexión a Supabase. Revisa que config.js tenga tus credenciales.';
+    document.getElementById('loading').style.display = 'none';
+    return;
+  }
+
+  // Suscribirse a cambios de sesión (por si el token se refresca)
+  _unsubAuth = window.KikiDB.onAuthStateChange(async (session) => {
+    await refreshView();
+  });
+
+  await refreshView();
+  document.getElementById('loading').style.display = 'none';
+}
+
+// ===== Cambiar entre vistas =====
+function showView(view){
+  document.getElementById('authView').style.display = view === 'auth' ? '' : 'none';
+  document.getElementById('profileView').style.display = view === 'profile' ? '' : 'none';
+}
+
+// ===== Refrescar vista según sesión =====
+async function refreshView(){
+  let profile = null;
+  try { profile = await window.KikiDB.getCurrentProfile(); } catch(e){ profile = null; }
+  _profile = profile;
+
+  if(profile){
+    showView('profile');
+    // Avatar: primera letra del nombre o email
+    const initial = (profile.full_name || profile.email || '?').charAt(0).toUpperCase();
+    document.getElementById('avatar').textContent = initial;
+    document.getElementById('userName').textContent = profile.full_name || 'Cliente';
+    document.getElementById('userEmail').textContent = profile.email || '';
+
+    // Rellenar formulario de perfil
+    document.getElementById('pfName').value = profile.full_name || '';
+    document.getElementById('pfPhone').value = profile.phone || '';
+    document.getElementById('pfStreet').value = profile.address_street || '';
+    document.getElementById('pfCity').value = profile.address_city || '';
+    document.getElementById('pfState').value = profile.address_state || '';
+    document.getElementById('pfZip').value = profile.address_zip || '';
+
+    // Cargar pedidos
+    loadMyOrders();
+  } else {
+    showView('auth');
+  }
+}
+
+// ===== Tabs login/signup =====
+function switchTab(tab){
+  const loginForm = document.getElementById('loginForm');
+  const signupForm = document.getElementById('signupForm');
+  const otpForm = document.getElementById('otpForm');
+  const tabLogin = document.getElementById('tabLogin');
+  const tabSignup = document.getElementById('tabSignup');
+  // Ocultar OTP siempre al cambiar de tab
+  if(otpForm) otpForm.style.display = 'none';
+  if(tab === 'login'){
+    loginForm.style.display = '';
+    signupForm.style.display = 'none';
+    tabLogin.classList.add('active');
+    tabSignup.classList.remove('active');
+  } else {
+    loginForm.style.display = 'none';
+    signupForm.style.display = '';
+    tabLogin.classList.remove('active');
+    tabSignup.classList.add('active');
+  }
+}
+
+// Estado del flujo OTP (email pendiente de verificación)
+let _otpEmail = '';
+
+// ===== Login =====
+async function doLogin(event){
+  event.preventDefault();
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const hint = document.getElementById('loginHint');
+  hint.className = 'hint';
+  hint.textContent = 'Iniciando sesión…';
+  try {
+    const { error } = await window.KikiDB.signIn(email, password);
+    if(error) throw error;
+    showToast('✓ Sesión iniciada. Redirigiendo a la tienda…');
+    setTimeout(() => { window.location.href = 'kikis_collection_store.html'; }, 1200);
+  } catch(err){
+    hint.className = 'hint err';
+    hint.textContent = 'No se pudo iniciar sesión: ' + (err.message || err);
+  }
+}
+
+// ===== Signup (con verificación por email) =====
+async function doSignup(event){
+  event.preventDefault();
+  const fullName = document.getElementById('signupName').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
+  const phone = document.getElementById('signupPhone').value.trim();
+  const password = document.getElementById('signupPassword').value;
+  const hint = document.getElementById('signupHint');
+  hint.className = 'hint';
+  hint.textContent = 'Creando cuenta y enviando correo de verificación…';
+  try {
+    // signUp crea el usuario en auth.users y dispara el correo de confirmación.
+    // El contenido del correo depende de la config de Supabase:
+    //   - Sin SMTP custom: enlace "Confirm email address"
+    //   - Con SMTP custom + plantilla {{ .Token }}: código de 6 dígitos
+    const result = await window.KikiDB.signUpCustomer(email, password, fullName, phone);
+    // Si Supabase devuelve sesión directa (confirmación desactivada), ir a la tienda
+    if(result && result.session){
+      showToast('✓ Cuenta creada. Redirigiendo a la tienda…');
+      setTimeout(() => { window.location.href = 'kikis_collection_store.html'; }, 1200);
+      return;
+    }
+    // Si no devuelve sesión, requiere verificación por email → mostrar form OTP
+    _otpEmail = email;
+    showOtpForm(email);
+  } catch(err){
+    hint.className = 'hint err';
+    hint.textContent = 'No se pudo crear la cuenta: ' + (err.message || err);
+  }
+}
+
+// ===== Mostrar el formulario OTP =====
+// Detecta si Supabase redirigió con token_hash (modo automático) o si el cliente
+// aún no ha hecho clic en el enlace (modo manual). En modo manual, si hay SMTP
+// custom con plantilla {{ .Token }}, se muestra el input de 6 dígitos.
+function showOtpForm(email){
+  document.getElementById('loginForm').style.display = 'none';
+  document.getElementById('signupForm').style.display = 'none';
+  const otpForm = document.getElementById('otpForm');
+  otpForm.style.display = '';
+  document.getElementById('otpEmailDisplay').textContent = email;
+
+  // Detectar si Supabase redirigió con token_hash en la URL (verificación automática)
+  const params = new URLSearchParams(window.location.search);
+  const tokenHash = params.get('token_hash');
+  const tokenType = params.get('type');
+
+  if(tokenHash && tokenType){
+    // Supabase redirigió tras hacer clic en el enlace → verificar automáticamente
+    document.getElementById('otpIntroText').innerHTML = 'Verificando tu correo automáticamente…';
+    document.getElementById('otpCodeWrap').style.display = 'none';
+    document.getElementById('otpLinkWrap').style.display = 'none';
+    autoVerifyFromUrl(tokenHash, tokenType);
+    return;
+  }
+
+  // Sin token_hash: el cliente acaba de registrarse. Preguntar si tiene SMTP custom.
+  // Como no podemos saberlo desde el cliente, mostramos AMBOS modos:
+  //   - Si recibió un código de 6 dígitos → lo escribe en el input (modo A)
+  //   - Si recibió un enlace → hace clic y luego "Ya verifiqué" (modo B)
+  document.getElementById('otpIntroText').innerHTML = 'Te enviamos un correo a <b id="otpEmailDisplay">' + email + '</b>. Sigue las instrucciones del correo para activar tu cuenta.';
+  document.getElementById('otpCodeWrap').style.display = '';
+  document.getElementById('otpLinkWrap').style.display = '';
+  // Re-asignar el email display (lo perdimos en el innerHTML de arriba)
+  document.getElementById('otpEmailDisplay').textContent = email;
+  // Limpiar hints
+  document.getElementById('otpHint').textContent = '';
+  const hint2 = document.getElementById('otpHint2');
+  if(hint2){ hint2.textContent = ''; }
+  // Focus en el input del código
+  setTimeout(() => {
+    const codeInput = document.getElementById('otpCode');
+    if(codeInput) codeInput.focus();
+  }, 100);
+}
+
+// ===== Verificación automática cuando Supabase redirige con token_hash =====
+async function autoVerifyFromUrl(tokenHash, tokenType){
+  const intro = document.getElementById('otpIntroText');
+  try {
+    const result = await window.KikiDB.verifyOtpTokenHash(tokenHash, tokenType);
+    if(result && result.error) throw result.error;
+    intro.innerHTML = '✓ <b style="color:var(--green)">¡Correo verificado!</b> Redirigiendo a la tienda…';
+    showToast('✓ ¡Cuenta verificada! Redirigiendo a la tienda…');
+    // Limpiar la URL (quitar token_hash)
+    window.history.replaceState({}, document.title, window.location.pathname);
+    setTimeout(() => { window.location.href = 'kikis_collection_store.html'; }, 1500);
+  } catch(err){
+    intro.innerHTML = '⚠️ No se pudo verificar: ' + (err.message || err) + '. Intenta iniciar sesión; si tu cuenta ya está activa, entrará sin problema.';
+  }
+}
+
+// ===== Verificar el código OTP de 6 dígitos (modo A, requiere SMTP custom) =====
+async function verifyOtpCode(event){
+  event.preventDefault();
+  const token = document.getElementById('otpCode').value.trim();
+  const hint = document.getElementById('otpHint');
+  if(!_otpEmail){ hint.className = 'hint err'; hint.textContent = 'Sesión expirada. Vuelve a registrarte.'; return; }
+  hint.className = 'hint';
+  hint.textContent = 'Verificando código…';
+  try {
+    const result = await window.KikiDB.verifyEmailOtp(_otpEmail, token);
+    if(result && result.error) throw result.error;
+    showToast('✓ ¡Cuenta verificada! Redirigiendo a la tienda…');
+    setTimeout(() => { window.location.href = 'kikis_collection_store.html'; }, 1500);
+  } catch(err){
+    hint.className = 'hint err';
+    hint.textContent = 'No se pudo verificar: ' + (err.message || err) + '. Revisa el código e intenta de nuevo.';
+  }
+}
+
+// ===== "Ya verifiqué mi correo" (modo B, enlace nativo sin SMTP) =====
+// El cliente hizo clic en el enlace del correo en otro dispositivo. Aquí intentamos
+// iniciar sesión: si la cuenta está confirmada, entra; si no, le decimos que espere.
+async function checkIfVerified(){
+  if(!_otpEmail) return;
+  const hint = document.getElementById('otpHint2');
+  hint.className = 'hint';
+  hint.textContent = 'Verificando el estado de tu cuenta…';
+  // Pedir la contraseña al cliente (la guardamos temporalmente al registrarse)
+  const password = document.getElementById('signupPassword').value;
+  if(!password){
+    hint.className = 'hint err';
+    hint.textContent = 'No se pudo verificar automáticamente. Inicia sesión con tu correo y contraseña en la pestaña "Iniciar sesión".';
+    return;
+  }
+  try {
+    const { error } = await window.KikiDB.signIn(_otpEmail, password);
+    if(error){
+      // Si el error es "Email not confirmed", la cuenta aún no está activa
+      const msg = (error.message || '').toLowerCase();
+      if(msg.includes('confirm') || msg.includes('not verified') || msg.includes('email')){
+        hint.className = 'hint err';
+        hint.textContent = 'Tu correo aún no está confirmado. Abre el correo de Supabase y haz clic en "Confirm email address", luego vuelve a presionar este botón.';
+      } else {
+        throw error;
+      }
+      return;
+    }
+    showToast('✓ ¡Cuenta verificada! Redirigiendo a la tienda…');
+    setTimeout(() => { window.location.href = 'kikis_collection_store.html'; }, 1500);
+  } catch(err){
+    hint.className = 'hint err';
+    hint.textContent = 'No se pudo verificar: ' + (err.message || err);
+  }
+}
+
+// ===== Reenviar correo/código OTP =====
+async function resendOtpCode(){
+  if(!_otpEmail) return;
+  const hint = document.getElementById('otpHint');
+  const hint2 = document.getElementById('otpHint2');
+  const targetHint = hint2 && hint2.offsetParent !== null ? hint2 : hint;
+  targetHint.className = 'hint';
+  targetHint.textContent = 'Reenviando correo…';
+  try {
+    const result = await window.KikiDB.resendOtp(_otpEmail);
+    if(result && result.error) throw result.error;
+    targetHint.className = 'hint ok';
+    targetHint.textContent = '✓ Correo reenviado. Revisa tu bandeja de entrada (y spam).';
+  } catch(err){
+    targetHint.className = 'hint err';
+    targetHint.textContent = 'No se pudo reenviar: ' + (err.message || err);
+  }
+}
+
+// ===== Cancelar el flujo OTP =====
+function cancelOtp(){
+  _otpEmail = '';
+  const codeInput = document.getElementById('otpCode');
+  if(codeInput) codeInput.value = '';
+  document.getElementById('otpForm').style.display = 'none';
+  // Limpiar token_hash de la URL si quedó
+  if(window.location.search.includes('token_hash')){
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+  switchTab('login');
+}
+
+// ===== Al cargar la página: detectar si Supabase redirigió con token_hash =====
+// (el cliente hizo clic en el enlace del correo y llegó aquí)
+window.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const tokenHash = params.get('token_hash');
+  const tokenType = params.get('type');
+  if(tokenHash && tokenType){
+    // Mostrar el form OTP en modo verificación automática
+    _otpEmail = params.get('email') || '';
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('signupForm').style.display = 'none';
+    document.getElementById('otpForm').style.display = '';
+    document.getElementById('otpEmailDisplay').textContent = _otpEmail || 'tu correo';
+    document.getElementById('otpIntroText').innerHTML = 'Verificando tu correo automáticamente…';
+    document.getElementById('otpCodeWrap').style.display = 'none';
+    document.getElementById('otpLinkWrap').style.display = 'none';
+    autoVerifyFromUrl(tokenHash, tokenType);
+  }
+});
+
+// ===== Logout =====
+async function doLogout(){
+  try { await window.KikiDB.signOut(); } catch(e){}
+  _profile = null;
+  showToast('Sesión cerrada');
+  await refreshView();
+}
+
+// ===== Guardar perfil =====
+async function saveProfile(event){
+  event.preventDefault();
+  if(!_profile){ return; }
+  try {
+    const updated = await window.KikiDB.updateProfile({
+      full_name: document.getElementById('pfName').value.trim(),
+      phone: document.getElementById('pfPhone').value.trim(),
+      address_street: document.getElementById('pfStreet').value.trim(),
+      address_city: document.getElementById('pfCity').value.trim(),
+      address_state: document.getElementById('pfState').value.trim(),
+      address_zip: document.getElementById('pfZip').value.trim()
+    });
+    _profile = updated;
+    document.getElementById('userName').textContent = updated.full_name || 'Cliente';
+    const initial = (updated.full_name || updated.email || '?').charAt(0).toUpperCase();
+    document.getElementById('avatar').textContent = initial;
+    showToast('✓ Datos guardados. Redirigiendo a la tienda…');
+    // Redirigir a la tienda después de 1.2 segundos
+    setTimeout(() => { window.location.href = 'kikis_collection_store.html'; }, 1200);
+  } catch(err){
+    showToast('No se pudieron guardar los datos: ' + (err.message || err), true);
+  }
+}
+
+// ===== Mis pedidos =====
+async function loadMyOrders(){
+  const list = document.getElementById('ordersList');
+  try {
+    const orders = await window.KikiDB.listMyOrders();
+    if(!orders || orders.length === 0){
+      list.innerHTML = '<p class="empty">Aún no tienes pedidos registrados.<br>Cuando finalices una compra, aparecerá aquí.</p>';
+      return;
+    }
+    list.innerHTML = orders.map(o => {
+      const items = (o.order_items || []).map(it => '• ' + escapeHtml(it.name) + ' ×' + it.qty).join('<br>');
+      const date = new Date(o.created_at).toLocaleDateString('es-MX', {day:'2-digit', month:'short', year:'numeric'});
+      const statusLabel = (o.status || 'pendiente').charAt(0).toUpperCase() + (o.status || 'pendiente').slice(1);
+      const total = fmtMoney(o.total);
+      return '<div class="order-card">' +
+        '<div class="ord-head">' +
+          '<span class="ord-num">Pedido #' + o.id + '</span>' +
+          '<span class="ord-status ' + (o.status||'pendiente') + '">' + statusLabel + '</span>' +
+        '</div>' +
+        '<div class="ord-items">' + (items || '<i>Sin items</i>') + '</div>' +
+        '<div class="ord-foot">' +
+          '<span class="total">' + total + '</span>' +
+          '<span class="date">' + date + '</span>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  } catch(err){
+    list.innerHTML = '<p class="empty">No se pudieron cargar tus pedidos: ' + escapeHtml(err.message || '') + '</p>';
+  }
+}
+
+// ===== Helpers =====
+function showToast(msg, isError){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (isError ? ' err' : '');
+  setTimeout(() => t.className = 'toast', 3000);
+}
+
+function escapeHtml(s){
+  if(s == null) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function fmtMoney(n){
+  const num = Number(n) || 0;
+  return '$' + num.toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' MXN';
+}
+</script>
+</body>
+</html>

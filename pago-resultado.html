@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resultado del pago · Kiki's Collection Shop</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23fff' stroke='%23000' stroke-width='4'/%3E%3Cpath d='M2 50a48 48 0 0 1 96 0' fill='%23dc2626'/%3E%3Crect x='2' y='46' width='96' height='8' fill='%23000'/%3E%3Ccircle cx='50' cy='50' r='14' fill='%23fff' stroke='%23000' stroke-width='4'/%3E%3Ccircle cx='50' cy='50' r='6' fill='%23fff' stroke='%23000' stroke-width='3'/%3E%3C/svg%3E">
+<meta name="robots" content="noindex, nofollow">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --gold:#c9a227;--orange:#e07a3c;--teal-deep:#0d2b32;--cream:#ffebcd;
+    --green:#062b14;--text:#1f1f1f;--text-dim:#666;--border:#e5e0d6;--bg:#faf7f0;
+  }
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;line-height:1.5}
+  .card{background:#fff;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.08);max-width:520px;width:100%;padding:32px 28px;text-align:center}
+  .icon{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:2.2rem}
+  .icon.success{background:#d1fae5;color:#065f46}
+  .icon.pending{background:#fef3c7;color:#92400e}
+  .icon.failure{background:#fee2e2;color:#991b1b}
+  .icon.loading{background:#dbeafe;color:#1e40af;font-size:1.4rem}
+  h1{font-size:1.4rem;margin-bottom:8px;color:var(--text)}
+  .lead{font-size:0.95rem;color:var(--text-dim);margin-bottom:22px}
+  .detail{background:var(--bg);border-radius:8px;padding:14px;text-align:left;font-size:0.86rem;margin-bottom:22px}
+  .detail .row{display:flex;justify-content:space-between;margin:6px 0;padding:4px 0;border-bottom:1px dashed var(--border)}
+  .detail .row:last-child{border-bottom:0}
+  .detail .row b{color:var(--text);font-weight:600}
+  .detail .row span:first-child{color:var(--text-dim)}
+  .status-badge{display:inline-block;padding:4px 12px;border-radius:14px;font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+  .status-badge.approved{background:#d1fae5;color:#065f46}
+  .status-badge.pending{background:#fef3c7;color:#92400e}
+  .status-badge.rejected{background:#fee2e2;color:#991b1b}
+  .status-badge.unknown{background:#e5e7eb;color:#374151}
+  .actions{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+  .btn{display:block;width:100%;padding:14px;border:0;border-radius:8px;font-size:0.95rem;font-weight:700;cursor:pointer;text-decoration:none;text-align:center;transition:background .15s,transform .1s;font-family:inherit}
+  .btn-primary{background:var(--gold);color:#2a1500}
+  .btn-primary:hover{background:var(--orange)}
+  .btn-whatsapp{background:#25d366;color:#062b14}
+  .btn-whatsapp:hover{background:#1eb858}
+  .btn-ghost{background:transparent;color:var(--text-dim);border:1px solid var(--border)}
+  .btn-ghost:hover{background:#f7f6f3}
+  .order-num{font-size:1.1rem;font-weight:800;color:var(--gold);margin:6px 0 14px;letter-spacing:.5px}
+  .spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(30,64,175,.25);border-top-color:#1e40af;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-3px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @media (max-width:480px){
+    .card{padding:24px 18px}
+    h1{font-size:1.2rem}
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon loading" id="resultIcon"><span class="spinner"></span></div>
+    <h1 id="resultTitle">Verificando tu pago…</h1>
+    <p class="lead" id="resultLead">Estamos confirmando el estado de tu transacción con el proveedor de pago. Esto toma solo unos segundos.</p>
+
+    <div class="order-num" id="orderNum" style="display:none"></div>
+
+    <div class="detail" id="resultDetail" style="display:none"></div>
+
+    <div class="actions" id="actions" style="display:none">
+      <a href="/" class="btn btn-primary">Volver a la tienda</a>
+      <a href="#" id="whatsappBtn" class="btn btn-whatsapp" target="_blank" rel="noopener">💬 Contactar por WhatsApp</a>
+      <a href="/" class="btn btn-ghost">Seguir comprando</a>
+    </div>
+  </div>
+
+<script>
+// =========================================================================
+// Página de resultado de pago.
+// Recibe query params del redirect de MercadoPago o Stripe:
+//   ?prov=mercadopago&status=success&order=12345&payment_id=...&preference_id=...
+//   ?prov=stripe&status=success&order=12345&session_id=cs_test_...
+//
+// Aunque el "status" del redirect es una pista, consultamos el estado real
+// al proveedor vía /api/<prov>/verify (con la secret_key server-side) para
+// evitar spoofing: el cliente podría llegar a "success" pero el pago estar
+// pendiente.
+// =========================================================================
+
+(function(){
+  const params = new URLSearchParams(window.location.search);
+  const prov  = params.get('prov')  || '';
+  const status= params.get('status')|| '';
+  const order = params.get('order') || '';
+  const paymentId = params.get('payment_id') || params.get('collection_id') || '';
+  const preferenceId = params.get('preference_id') || '';
+  const sessionId = params.get('session_id') || '';
+
+  const WHATSAPP_NUMBER = window.WHATSAPP_NUMBER || '529626141770';
+  const orderIdDisplay = order ? '#' + order : '';
+
+  // 1) Si no hay proveedor, es un acceso directo a la página → mostrar error genérico
+  if(!prov){
+    showResult('unknown', 'No se encontró información del pago', 'Si crees que esto es un error, contáctanos por WhatsApp con tu número de pedido.', orderIdDisplay);
+    return;
+  }
+
+  // 2) Verificar el estado real consultando nuestro API
+  verifyPayment();
+
+  async function verifyPayment(){
+    try {
+      let url;
+      if(prov === 'mercadopago'){
+        const q = new URLSearchParams({ order });
+        if(paymentId)         q.set('payment_id', paymentId);
+        else if(preferenceId) q.set('preference_id', preferenceId);
+        url = '/api/mercadopago/verify?' + q.toString();
+      } else if(prov === 'stripe'){
+        if(!sessionId){ throw new Error('Falta session_id'); }
+        url = '/api/stripe/verify?session_id=' + encodeURIComponent(sessionId);
+      } else {
+        throw new Error('Proveedor desconocido: ' + prov);
+      }
+
+      const resp = await fetch(url);
+      const data = await resp.json();
+
+      if(!resp.ok){
+        console.error('verify error:', data);
+        showResult('unknown', 'No pudimos verificar tu pago', data.error || data.detail || 'Intenta nuevamente en unos minutos o contáctanos por WhatsApp.', orderIdDisplay);
+        return;
+      }
+
+      // Renderizar según el estado real
+      const st = data.status || 'unknown';
+      showResult(st, data.order_id ? 'Pedido ' + data.order_id : orderIdDisplay, data, data.order_id || order);
+
+    } catch(err){
+      console.error('verify exception:', err);
+      showResult('unknown', 'Error de conexión', 'No pudimos verificar el estado del pago en este momento. Si ya realizaste el pago, no te preocupes: contáctanos por WhatsApp con tu número de pedido y lo confirmamos manualmente.', orderIdDisplay);
+    }
+  }
+
+  function showResult(status, title, detail, orderNum){
+    // Normaliza orderNum: si viene con '#' al inicio (orderIdDisplay), lo quitamos
+    // para que abajo podamos concatenarlo de forma consistente.
+    if(orderNum && typeof orderNum === 'string' && orderNum.startsWith('#')){
+      orderNum = orderNum.slice(1);
+    }
+    const icon = document.getElementById('resultIcon');
+    const h1 = document.getElementById('resultTitle');
+    const lead = document.getElementById('resultLead');
+    const detailEl = document.getElementById('resultDetail');
+    const actionsEl = document.getElementById('actions');
+    const orderNumEl = document.getElementById('orderNum');
+    const whatsappBtn = document.getElementById('whatsappBtn');
+
+    // Clases de icono
+    icon.className = 'icon ' + (
+      status === 'approved' ? 'success' :
+      status === 'pending' || status === 'in_process' || status === 'authorized' ? 'pending' :
+      status === 'rejected' || status === 'cancelled' ? 'failure' : 'loading'
+    );
+
+    // Iconos según estado
+    const iconEmoji = {
+      approved: '✓',
+      pending: '⏳', 'in_process': '⏳', 'authorized': '⏳',
+      rejected: '✗', cancelled: '✗',
+      unknown: '?'
+    };
+    icon.innerHTML = status === 'unknown' ? '<span class="spinner"></span>' : (iconEmoji[status] || '?');
+
+    // Títulos y leads
+    const titleText = {
+      approved: '¡Pago aprobado!',
+      pending:  'Pago en proceso',
+      'in_process': 'Pago en proceso',
+      authorized: 'Pago autorizado (pendiente de captura)',
+      rejected: 'Pago rechazado',
+      cancelled: 'Pago cancelado',
+      unknown: 'Estado desconocido'
+    };
+    h1.textContent = titleText[status] || 'Resultado del pago';
+
+    const leadText = {
+      approved: 'Gracias por tu compra. Recibirás la confirmación y el seguimiento de tu pedido por correo o WhatsApp.',
+      pending:  'Tu pago está siendo procesado por el proveedor. Te avisaremos en cuanto se confirme.',
+      'in_process': 'Tu pago está siendo procesado por el proveedor. Te avisaremos en cuanto se confirme.',
+      authorized: 'Tu pago fue autorizado y está en revisión. Te avisaremos en cuanto se confirme.',
+      rejected: 'Tu pago fue rechazado por el proveedor. Puedes intentar nuevamente con otro método o contactarnos por WhatsApp.',
+      cancelled: 'La transacción fue cancelada. Si tienes dudas, contáctanos por WhatsApp.',
+      unknown: 'No pudimos determinar el estado final de tu pago. Si ya lo realizaste, contáctanos por WhatsApp con tu número de pedido.'
+    };
+    lead.textContent = leadText[status] || 'Resultado del pago recibido.';
+
+    // Número de pedido
+    if(orderNum){
+      orderNumEl.textContent = 'Pedido #' + orderNum;
+      orderNumEl.style.display = 'block';
+    }
+
+    // Detalle
+    if(detail && typeof detail === 'object' && (detail.payment_id || detail.transaction_amount || detail.payment_method || detail.payer_email)){
+      const rows = [];
+      if(detail.provider) rows.push(['Proveedor', detail.provider === 'mercadopago' ? 'MercadoPago' : 'Stripe']);
+      if(detail.payment_id) rows.push(['Referencia', detail.payment_id]);
+      if(detail.payment_method) rows.push(['Método', detail.payment_method]);
+      if(detail.transaction_amount != null) rows.push(['Monto', '$' + Number(detail.transaction_amount).toLocaleString('es-MX', {minimumFractionDigits:2}) + (detail.currency ? ' ' + detail.currency.toUpperCase() : '')]);
+      if(detail.payer_email) rows.push(['Correo', detail.payer_email]);
+      if(detail.date_approved) rows.push(['Fecha', new Date(detail.date_approved).toLocaleString('es-MX')]);
+      if(detail.status_detail) rows.push(['Detalle', detail.status_detail]);
+
+      detailEl.innerHTML = rows.map(r => `<div class="row"><span>${r[0]}</span><b>${r[1]}</b></div>`).join('');
+      detailEl.style.display = 'block';
+    }
+
+    // Acciones
+    actionsEl.style.display = 'flex';
+
+    // Botón WhatsApp con mensaje pre-armado
+    const waMsg = encodeURIComponent(
+      `¡Hola Kiki's Collection Shop! 👋 Vengo del resultado de pago.${orderNum ? ' Mi pedido es #' + orderNum : ''}. Estado: ${status}. ¿Me apoyas con el seguimiento?`
+    );
+    whatsappBtn.href = 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + waMsg;
+  }
+})();
+</script>
+</body>
+</html>

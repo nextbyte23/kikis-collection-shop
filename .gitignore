@@ -1,0 +1,19 @@
+# Dependencias
+node_modules/
+
+# Variables de entorno (NUNCA subir las llaves secretas)
+.env
+.env.local
+.env.*.local
+
+# Solo se sube .env.example (plantilla sin valores reales)
+
+# Sistema operativo / editor
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
+.idea/
+
+# Vercel
+.vercel/
